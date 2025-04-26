@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Loan Verify</string>
+    <string name="error">something went wrong.</string>
+
+    <string name="login_title">Loan Verifier</string>
+    <string name="login_subtitle">Enter your credentials to continue</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="login_info">Default login: username: admin, password: admin123</string>
+
+    <!-- Dashboard Screen -->
+    <string name="welcome_message">Welcome, %s!</string>
+    <string name="loan_applications">Loan Applications</string>
+    <string name="no_applications_found">No applications found</string>
+    <string name="add_new_application">Add New Application</string>
+    <string name="filter">Filter</string>
+    <string name="all_applications">All Applications</string>
+    <string name="my_applications">My Applications</string>
+    <string name="pending_applications">Pending Applications</string>
+    <string name="approved_applications">Approved Applications</string>
+    <string name="rejected_applications">Rejected Applications</string>
+    <string name="logout">Logout</string>
+
+    <!-- Loan Application Item -->
+    <string name="amount">Amount:</string>
+    <string name="date">Date:</string>
+    <string name="purpose">Purpose:</string>
+
+    <!-- Loan Application Form -->
+    <string name="loan_application_form">Salaried Loan Application</string>
+    <string name="fill_applicant_details">Fill in the applicant details below</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email_address">Email Address</string>
+    <string name="residential_address">Residential Address</string>
+    <string name="id_number">ID Number / Passport</string>
+    <string name="loan_information">Loan Information</string>
+    <string name="loan_amount">Loan Amount</string>
+    <string name="loan_purpose">Loan Purpose</string>
+    <string name="loan_term_months">Loan Term (Months)</string>
+    <string name="financial_information">Financial Information</string>
+    <string name="employment_status">Employment Status</string>
+    <string name="monthly_income">Monthly Income</string>
+    <string name="has_existing_loans">Has existing loans</string>
+    <string name="existing_loan_details">Existing Loan Details</string>
+    <string name="additional_notes">Additional Notes (Optional)</string>
+    <string name="submit_application">Submit Application</string>
+</resources>

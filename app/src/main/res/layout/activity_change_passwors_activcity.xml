@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/signin_round_shape"
+        android:backgroundTint="@color/white_color"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/layout_toolbar"
+            android:elevation="4dp" />
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:scrollbarSize="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/white"
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/white"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center|left"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="14dp"
+                            android:fontFamily="@font/intel"
+                            android:foregroundGravity="center"
+                            android:text="Old Password"
+                            android:textColor="@color/title_color"
+                            android:textSize="14dp"
+                            android:textStyle="bold" />
+
+                        <EditText
+                            android:id="@+id/edtOldPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@drawable/edit_txtbg"
+                            android:clickable="true"
+                            android:fontFamily="@font/intel"
+                            android:inputType="textPassword"
+                            android:padding="12dp"
+                            android:paddingStart="16dp"
+                            android:text=""
+                            android:textColor="@color/text_color"
+                            android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center|left"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="14dp"
+                            android:fontFamily="@font/intel"
+                            android:foregroundGravity="center"
+                            android:text="New Password"
+                            android:textColor="@color/title_color"
+                            android:textSize="14dp"
+                            android:textStyle="bold" />
+
+
+                        <EditText
+                            android:id="@+id/newPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@drawable/edit_txtbg"
+                            android:clickable="true"
+                            android:fontFamily="@font/intel"
+                            android:inputType="textPassword"
+                            android:padding="12dp"
+                            android:paddingStart="16dp"
+                            android:text=""
+                            android:textColor="@color/text_color"
+                            android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center|left"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="14dp"
+                            android:fontFamily="@font/intel"
+                            android:foregroundGravity="center"
+                            android:text="Confirm Password"
+                            android:textColor="@color/title_color"
+                            android:textSize="14dp"
+                            android:textStyle="bold" />
+
+
+                        <EditText
+                            android:id="@+id/confirmPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="6dp"
+                            android:background="@drawable/edit_txtbg"
+                            android:clickable="true"
+                            android:fontFamily="@font/intel"
+                            android:inputType="textPassword"
+                            android:padding="12dp"
+                            android:paddingStart="16dp"
+                            android:text=""
+                            android:textColor="@color/text_color"
+                            android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn"
+                            android:layout_width="match_parent"
+                            android:layout_height="51dp"
+                            android:layout_gravity="center"
+                            android:layout_marginStart="36dp"
+                            android:layout_marginTop="24dp"
+                            android:layout_marginEnd="36dp"
+                            android:layout_marginBottom="24dp"
+                            android:background="@drawable/round_corner_shape"
+                            android:backgroundTint="@color/theme_color"
+                            android:text="Change Password"
+                            android:textColor="@color/button_bg" />
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

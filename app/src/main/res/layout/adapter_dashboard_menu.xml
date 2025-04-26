@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:id="@+id/layout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@android:color/white">
+
+            <!-- Case ID & Status -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+
+                android:weightSum="2"
+                >
+
+                <TextView
+                    android:id="@+id/txt_case_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/intel"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:text="Case ID: 00--XXXX"
+                    android:textColor="@color/them_dark_color"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_weight="1"
+                    android:layout_margin="4dp"
+                    android:elevation="2dp"
+                    android:id="@+id/txt_status"
+                    android:layout_width="match_parent"
+                    android:fontFamily="@font/intel"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/round_corner_shape"
+                    android:text="Pending"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:foregroundGravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:padding="6dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <!-- Name -->
+            <TextView
+                android:id="@+id/ApplicantName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Name: John Doe"
+                android:fontFamily="@font/intel"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:textStyle="bold"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+            <!-- Application No & Date -->
+            <TextView
+                android:id="@+id/txt_application_no"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/intel"
+                android:text="Application No: 2267115"
+                android:textColor="@color/gray_btn_bg_color"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/MobileNo"
+                android:fontFamily="@font/intel"
+                android:layout_width="match_parent"
+                android:layout_marginTop="2dp"
+                android:layout_height="wrap_content"
+                android:text="Mobile No: 2267115"
+                android:textColor="@color/gray_btn_bg_color"
+                android:textSize="14sp"/>
+
+<!--
+            <TextView
+                android:id="@+id/ApplicantName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Initiated Date: 2023-12-01"
+                android:textColor="@color/gray_btn_bg_color"
+                android:textSize="14sp"
+                android:paddingBottom="4dp"/>
+-->
+
+            <!-- Address -->
+            <TextView
+                android:id="@+id/txt_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address: 123 Street, City, Country"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:paddingTop="4dp"
+                android:fontFamily="@font/intel"
+                android:paddingBottom="4dp" />
+
+            <!-- Bank & Branch -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    android:id="@+id/Activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bank ID: 6"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"/>
+                
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/theme_color"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"/>
+
+                <TextView
+                    android:id="@+id/CustomerProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

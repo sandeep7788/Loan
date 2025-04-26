@@ -1,0 +1,79 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.CBISOLOR" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/them_dark_color</item>
+        <item name="colorPrimaryVariant">@color/them_dark_color</item>
+        <item name="colorOnPrimary">@color/txt_hint</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/them_dark_color</item>
+        <item name="colorSecondaryVariant">@color/them_dark_color</item>
+        <item name="colorOnSecondary">@color/them_dark_color</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/them_dark_color</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="BottomNavigationView" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">10sp</item>
+    </style>
+    <style name="BottomNavigationView.Active" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!--    <style name="BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+            <item name="android:layout_width">match_parent</item>
+            <item name="android:layout_gravity">bottom</item>
+            <item name="android:textSize">10sp</item>
+        </style>-->
+
+
+    <style name="popup" parent="Widget.AppCompat.ListView.DropDown">
+        <item name="android:divider">@color/cardview_shadow_start_color</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:textColor">@color/nev_textcolor</item>
+        <item name="android:itemBackground">@color/theme_color</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
+        <!--- Customize popmenu -->
+        <item name="android:dropDownListViewStyle">@style/popup</item>
+
+
+    </style>
+    <style name="FullWidth.Dialog" parent="Theme.AppCompat.DayNight.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!--<item name="android:windowAnimationStyle">@style/DialogAnimation</item>-->
+    </style>
+
+    <style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:textColor">@color/black</item>  // you can change the color of the yearPiker dialog
+        <item name="android:textColorPrimary">@color/gpvch_black</item> // you can change the color of the yearPiker dialog
+    </style>
+    <style name="spinnerItemStyle" parent="android:Widget.TextView.SpinnerItem">
+
+    </style>
+
+    <style name="spinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+
+    </style>
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog">
+
+        <item name="colorAccent">@color/theme_color</item>
+        <item name="android:textColorLink">@color/text_color</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:spinnersShown">true</item>
+        <item name="background">@color/theme_color</item>
+    </style>
+
+
+</resources>

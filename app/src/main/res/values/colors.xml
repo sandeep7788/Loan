@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="nev_textcolor">#666666</color>
+    <color name="txt_light_color">#666666</color>
+    <color name="txt_hint">#BDBDBD</color>
+    <color name="them_dark_color">#02639C</color>
+    <color name="green_color">#27AE60</color>
+
+    <color name="button_bg">#F6F6F6</color>
+    <color name="button_bg_border">#E8E8E8</color>
+    <color name="title_color">#666666</color>
+    <color name="theme_color">#3E6AB7</color>
+    <color name="nev_bg_color">#FAFAFA</color>
+    <color name="nev_icon_color">#ff858585</color>
+    <color name="main_blue_color">#3E6AB7</color>
+
+    <color name="nev_item_color">#666666</color>
+    <color name="text_color">#333333</color>
+
+    <color name="daysLabelColor">#8A000000</color>
+    <color name="currentMonthDayColor">#de000000</color>
+    <color name="nextMonthDayColor">#1F000000</color>
+    <color name="disabledDialogButtonColor">#1F000000</color>
+
+    <color name="itemHighlightColor">#1F000000</color>
+    <color name="itemFocusedColor">#1A000000</color>
+
+    <color name="defaultColor">#2962FF</color>
+
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="background">#ff00b0b0</color>
+    <color name="blue_btn_bg_color">#D6EAF8</color>
+    <color name="item_color">#cc000000</color>
+    <color name="blue_btn_bg_pressed_color">#ff96bfd2</color>
+    <color name="buttonColor">#ff0e5a75</color>
+    <color name="button_material_dark">#ff5a595b</color>
+    <color name="button_material_light">#ffd6d7d7</color>
+    <color name="button_text_color">#ffffffff</color>
+    <color name="cardview_dark_background">#ff424242</color>
+    <color name="cardview_light_background">#ffffffff</color>
+    <color name="cardview_shadow_end_color">#03000000</color>
+    <color name="cardview_shadow_start_color">#37000000</color>
+    <color name="colorAccent">#1418b0</color>
+    <color name="colorPrimary">#393186</color>
+    <color name="colorPrimaryDark">#393186</color>
+    <color name="view_color">#134584</color>
+    <color name="white_color">#f0f1f4</color>
+    <color name="color_accent">#ff7c4dff</color>
+    <color name="color_error">#fff44336</color>
+    <color name="color_success">#ff3ccd88</color>
+    <color name="error_color_material">#fff4511e</color>
+    <color name="error_stroke_color">#fff27474</color>
+    <color name="error_view_retry_button_background">#30000000</color>
+    <color name="error_view_retry_button_background_stroke">#50000000</color>
+    <color name="error_view_text">#ff656565</color>
+    <color name="error_view_text_dark">#cc000000</color>
+    <color name="error_view_text_light">#ff858585</color>
+    <color name="float_transparent">#00000000</color>
+    <color name="gray_btn_bg_color">#666666</color>
+    <color name="gray_btn_bg_pressed_color">#ffb6b6b6</color>
+    <color name="grey">#ffe8e8e8</color>
+    <color name="list_background">#ff303030</color>
+    <color name="list_background_pressed">#ff992416</color>
+    <color name="list_divider">#ff272727</color>
+    <color name="list_item_title">#ffffffff</color>
+    <color name="notification_icon_bg_color">#ff9e9e9e</color>
+    <color name="red_btn_bg_color">#ffdd6b55</color>
+    <color name="red_btn_bg_pressed_color">#ffcd5b55</color>
+    <color name="ripple_material_dark">#33ffffff</color>
+    <color name="ripple_material_light">#1f000000</color>
+
+    <color name="selection">#ffff9800</color>
+    <color name="success_stroke_color">#ffa5dc86</color>
+    <color name="sweet_dialog_bg_color">#ffffffff</color>
+
+    <color name="tooltip_background_dark">#e6616161</color>
+    <color name="tooltip_background_light">#e6ffffff</color>
+    <color name="gpvch_black">#212642</color>
+
+
+
+</resources>
