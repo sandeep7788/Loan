@@ -12,26 +12,40 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:name="com.cbi_solar.helper.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CBISOLOR"
+        android:screenOrientation="portrait"
+        android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
         tools:replace="android:icon" >
         <activity
             android:name="com.cbi_solar.SalaryForm"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name="com.cbi_solar.BussinessForm"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".DiscountActivity"
@@ -41,15 +55,18 @@
             android:exported="false" />
         <activity
             android:name="com.cbi_solar.ChangePasswordsActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".ProfileActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".TrackStatusActivity"
             android:exported="false" />
         <activity
             android:name=".ServicesForm"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".StoreListActivity"
@@ -73,6 +90,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <provider
             android:name="androidx.core.content.FileProvider"

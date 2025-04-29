@@ -34,7 +34,8 @@ public interface ApiInterface {
     @GET(ApiContants.PREF_customerlogin)
     Call<JsonObject> signIn(
             @Query("mobno") String mobno,
-            @Query("password") String password);
+            @Query("password") String password,
+            @Query("deviceID") String deviceID);
 
     @GET("CaseList")
     Call<JsonObject> getCaseList(@Query("verifier_id") int verifierId, @Header("Cookie") String cookie);

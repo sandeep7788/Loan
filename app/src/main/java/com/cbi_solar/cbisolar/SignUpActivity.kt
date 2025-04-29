@@ -220,10 +220,10 @@ class SignUpActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         binding.spinnerGender.onItemSelectedListener = this
         ClickListener()
         setGenderList(binding.spinnerGender)
-        binding.imageView3.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
+//        binding.imageView3.setOnClickListener {
+//            startActivity(Intent(this, MainActivity::class.java))
+//            finish()
+//        }
 
     }
 

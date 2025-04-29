@@ -16,11 +16,13 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.hardware.display.DisplayManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -37,18 +39,27 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
+import com.cbi_solar.SalaryForm.Companion
 import com.cbi_solar.cbisolar.MainActivity
 import com.cbi_solar.cbisolar.R
 import com.cbi_solar.cbisolar.Utility
@@ -81,7 +92,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-lateinit var bindinge: ActivityBussnessFormBinding
 
 class BussinessForm : AppCompatActivity() {
 
@@ -93,6 +103,7 @@ class BussinessForm : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     var PERMISSION_ID: Int = 44
     var TAG = "@@TAG"
+    lateinit var bindinge: ActivityBussnessFormBinding
 
     fun uploadImage(uri: Uri) {
 
@@ -152,9 +163,9 @@ class BussinessForm : AppCompatActivity() {
                             } else {
                                 setSubmitData()
                             }
-//                            Toast.makeText(
-//                                this@BussinessForm, " Image processing: $count", Toast.LENGTH_SHORT
-//                            ).show()
+                            Toast.makeText(
+                                this@BussinessForm, " Image processing: $count", Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             if (progressDialog.isShowing) {
                                 progressDialog.dismiss()
@@ -189,7 +200,6 @@ class BussinessForm : AppCompatActivity() {
 
     private val selectedImages = ArrayList<Uri>()
     private lateinit var imageAdapter: ImageAdapter
-    val CAMERA_PERMISSION_CODE = 100
     val spinnerfamilystatus = arrayOf("Select Family Status", "Joint Family", "Nuclear Family")
     val houseStatusOptions = arrayOf("Select House Status", "Owned", "Rented")
     val shopStatusOptions = arrayOf("Select Shop Status", "Owned", "Rented")
@@ -264,8 +274,8 @@ class BussinessForm : AppCompatActivity() {
                         bindinge.houseValueRentEditText.setHint("Value of House")
                     } else if (selectedItem.equals("Rented"))
                         bindinge.houseValueRentEditText.setHint(
-                        "Rent of House"
-                    ) else {
+                            "Rent of House"
+                        ) else {
                         bindinge.houseValueRentEditTextLayout.visibility = View.GONE
                         bindinge.houseValueRentEditText.setText("")
                     }
@@ -388,10 +398,8 @@ class BussinessForm : AppCompatActivity() {
         val storage: TextView? = findViewById(R.id.storage)
 
         storage?.setOnClickListener {
-            checkPermission(
-                Manifest.permission.READ_EXTERNAL_STORAGE, CAMERA_PERMISSION_CODE
-            )
-            bindinge.image.setText("Selected Images: "+selectedImages.size)
+            checkPermissionsCamera()
+            bindinge.image.setText("Selected Images: " + selectedImages.size)
         }
 
         imageAdapter = ImageAdapter(selectedImages)
@@ -399,6 +407,10 @@ class BussinessForm : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         bindinge.recyclerViewImages.adapter = imageAdapter
 
+        imageAdapter1 = ImageAdapter1(selectedImages)
+        bindinge.recyclerViewImages1.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        bindinge.recyclerViewImages1.adapter = imageAdapter1
 
         setlocation()
         Handler(Looper.getMainLooper()).postDelayed({
@@ -420,7 +432,23 @@ class BussinessForm : AppCompatActivity() {
         bindinge.buttonAddCustomerDetail.setOnClickListener { addCustomerDetail("", "") }
         bindinge.buttonAddSupplier.setOnClickListener { addbuttonAddSupplier("", "", "") }
         bindinge.submitSave.setOnClickListener {
-            saveFormData(bindinge, case_id, this@BussinessForm,true)
+            saveFormData(bindinge, case_id, this@BussinessForm, true)
+        }
+        bindinge.submitSave.setOnClickListener {
+            saveFormData(bindinge, case_id, this@BussinessForm, true)
+        }
+
+        previewView = bindinge.previewView
+        captureButton = bindinge.captureButton
+        captureButton.setOnClickListener {
+            captureImage()
+            bindinge.laoutCameraVisible.visibility = View.VISIBLE
+            bindinge.laoutCameraHide.visibility = View.GONE
+        }
+
+        bindinge.done.setOnClickListener {
+            bindinge.laoutCameraVisible.visibility = View.GONE
+            bindinge.laoutCameraHide.visibility = View.VISIBLE
         }
     }
 
@@ -447,8 +475,8 @@ class BussinessForm : AppCompatActivity() {
 
                 addLat = lat.toString()
                 addLong = lon.toString()
-                addAddress = "Address: $address\nCity: $city\nCountry: $country"
-                addressTextView = "Address: $address\nCity: $city\nCountry: $country"
+                addAddress = "Address: $address\n City: $city\n Country: $country "
+                addressTextView = "Address: $address\n City: $city\n Country: $country "
 
             } else {
                 addressTextView = "Location not found!"
@@ -625,51 +653,6 @@ class BussinessForm : AppCompatActivity() {
         }
     }
 
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this@BussinessForm, "Camera Permission Granted", Toast.LENGTH_SHORT)
-                    .show()
-//                openImagePicker()
-                openCamera()
-            } else {
-                Toast.makeText(this@BussinessForm, "Camera Permission Denied", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
-        if (requestCode == PERMISSION_ID) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLastLocation()
-            } else {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                        this, Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                ) {
-                    // "Don't ask again" selected
-                    showSettingsDialog()
-                } else {
-                    Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun showSettingsDialog() {
-        AlertDialog.Builder(this).setTitle("Permission Required")
-            .setMessage("You have denied location permission. Please enable it in settings.")
-            .setPositiveButton("Go to Settings") { _, _ ->
-                openAppSettings()
-            }.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-                Toast.makeText(this, "Permission still denied!", Toast.LENGTH_SHORT).show()
-                finish()
-            }.show()
-    }
-
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", packageName, null)
@@ -684,60 +667,53 @@ class BussinessForm : AppCompatActivity() {
         }
     }
 
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-            if (uris.isNotEmpty()) {
-//                selectedImages.clear()
+    private lateinit var imageAdapter1: ImageAdapter1
 
-
-                selectedImages.addAll(uris)
-                imageAdapter.notifyDataSetChanged()  // Refresh RecyclerView
-            }
-            bindinge.image.setText("Selected Images: "+selectedImages.size)
-        }
+    fun Float.toPx(context: Context): Float {
+        return this * context.resources.displayMetrics.scaledDensity
+    }
 
     fun addTimestampToImage(file: File) {
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        var bitmap = BitmapFactory.decodeFile(file.absolutePath)
             ?: throw IllegalArgumentException("Invalid image file")
 
-        val tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        // Correct the image orientation first (fix rotation if needed)
+        bitmap = rotateImageIfRequired(bitmap, file)
+
+        var tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(tempBitmap)
 
         val textPaint = Paint().apply {
             color = Color.WHITE
-            textSize = 80f
+            textSize = 10f.toPx(this@BussinessForm)
             typeface = Typeface.DEFAULT_BOLD
             isAntiAlias = true
+            textAlign = Paint.Align.CENTER
         }
 
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()) +
-                " lat:$addLat long:$addLat"
+        val timeStamp = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
+        ).format(Date())
 
-        val fullAddress = addressTextView.toString()
-        val halfLength = fullAddress.length / 2
-        val addressLine1 = fullAddress.substring(0, halfLength).trim()
-        val addressLine2 = fullAddress.substring(halfLength).trim()
+        val line1 = timeStamp
+        val line2 = "Lat: $addLat" + " Long: $addLong"
+        val line3 = addressTextView.toString().subSequence(0, addressTextView.toString().length/2)
+        val line4 = addressTextView.toString().subSequence(addressTextView.toString().length/2,addressTextView.toString().length-1)
 
-        val padding = 20f
-        val lineSpacing = 10f
+        val lines = listOf(line1, line2, line3, line4)
 
-        val boundsLine1 = Rect()
-        val boundsLine2 = Rect()
-        val boundsTimestamp = Rect()
+        val padding = 30f
+        val lineSpacing = 20f
 
-        textPaint.getTextBounds(addressLine1, 0, addressLine1.length, boundsLine1)
-        textPaint.getTextBounds(addressLine2, 0, addressLine2.length, boundsLine2)
-        textPaint.getTextBounds(timeStamp, 0, timeStamp.length, boundsTimestamp)
+        val textHeight = textPaint.fontMetrics.bottom - textPaint.fontMetrics.top
+        val totalTextHeight = lines.size * textHeight + (lines.size - 1) * lineSpacing
 
-        val maxTextWidth = maxOf(boundsLine1.width(), boundsLine2.width(), boundsTimestamp.width())
-        val totalTextHeight = boundsLine1.height() + boundsLine2.height() + boundsTimestamp.height() + (2 * lineSpacing)
+        val centerX = tempBitmap.width / 2f
+        val startY = tempBitmap.height - totalTextHeight - padding
 
-        val x = tempBitmap.width - maxTextWidth - padding
-        val yStart = tempBitmap.height - totalTextHeight - padding
-
-        val rectLeft = x - padding
-        val rectTop = yStart - padding
-        val rectRight = x + maxTextWidth + padding
+        val rectLeft = 0f
+        val rectTop = startY - padding
+        val rectRight = tempBitmap.width.toFloat()
         val rectBottom = tempBitmap.height.toFloat()
 
         val backgroundPaint = Paint().apply {
@@ -745,152 +721,48 @@ class BussinessForm : AppCompatActivity() {
             alpha = 150
         }
 
+        // Draw background rectangle
         canvas.drawRect(rectLeft, rectTop, rectRight, rectBottom, backgroundPaint)
 
-        val yLine1 = yStart + boundsLine1.height()
-        val yLine2 = yLine1 + boundsLine2.height() + lineSpacing
-        val yTimestamp = yLine2 + boundsTimestamp.height() + lineSpacing
-
-        canvas.drawText(addressLine1, x, yLine1, textPaint)
-        canvas.drawText(addressLine2, x, yLine2, textPaint)
-        canvas.drawText(timeStamp, x, yTimestamp, textPaint)
+        var y = startY
+        for (line in lines) {
+            y += textHeight
+            canvas.drawText(line.toString(), centerX, y, textPaint)
+            y += lineSpacing
+        }
 
         FileOutputStream(file).use { out ->
-            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        }
+
+//        tempBitmap = rotateImage(tempBitmap, 270f)
+//        FileOutputStream(file).use { out ->
+//            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+//        }
+
+//        bitmap = rotateImageIfRequired(bitmap, file)
+    }
+
+    fun rotateImageIfRequired(img: Bitmap, selectedFile: File): Bitmap {
+        val ei = ExifInterface(selectedFile.absolutePath)
+        val orientation =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+            else -> img
         }
     }
 
-/*
-    fun addTimestampToImage(file: File) {
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            ?: throw IllegalArgumentException("Invalid image file")
-
-        val tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(tempBitmap)
-
-        // Set up Paint for text
-        val textPaint = Paint().apply {
-            color = Color.WHITE
-            textSize = 80f
-            typeface = Typeface.DEFAULT_BOLD
-            isAntiAlias = true
-        }
-
-        // Get timestamp
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-
-        // Measure text size to determine background size
-//        addressTextView = "$addressTextView $timeStamp"
-        val textBounds = Rect()
-        textPaint.getTextBounds(("$addressTextView $timeStamp"), 0, ("$addressTextView $timeStamp").length, textBounds)
-
-        // Define position (bottom-right)
-        val padding = 20f
-        val x = tempBitmap.width - textBounds.width() - padding
-        val y = tempBitmap.height - padding
-
-        // Draw a transparent black background rectangle
-        val backgroundPaint = Paint().apply {
-            color = Color.BLACK
-            alpha = 150 // Adjust transparency (0 = fully transparent, 255 = solid black)
-        }
-        val rectLeft = x - padding
-        val rectTop = y - textBounds.height() - padding
-        val rectRight = x + textBounds.width() + padding
-        val rectBottom = y + padding
-
-        canvas.drawRect(rectLeft, rectTop, rectRight, rectBottom, backgroundPaint)
-
-        // Draw timestamp on top of the background
-        canvas.drawText(addressTextView.toString(), x, y, textPaint)
-
-        // Overwrite the original file
-        FileOutputStream(file).use { out ->
-            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-        }
-    }
-*/
-
-    private fun openImagePicker() {
-        imagePickerLauncher.launch("image/*")
+    fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
     }
 
     private var imageUri: Uri? = null
-    lateinit var arr: ArrayList<String>
-
-    private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success && imageUri != null) {
-                // Image successfully captured
-                Toast.makeText(this, "Image captured: $imageUri", Toast.LENGTH_SHORT).show()
-                if (imageUri != null) {
-
-                    selectedImages.add(imageUri!!)
-                    imageAdapter.notifyDataSetChanged()
-
-                } else {
-                    Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
-                }
-            }
-            bindinge.image.setText("Selected Images: "+selectedImages.size)
-        }
-
-    private fun ensureCorrectOrientation(context: Context, bitmap: Bitmap): Bitmap {
-        val matrix = Matrix()
-        val orientation = ExifInterface.ORIENTATION_NORMAL
-
-        // Modify the matrix based on the EXIF orientation
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
-        }
-
-        return if (matrix.isIdentity) {
-            bitmap // No rotation needed, return as is
-        } else {
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        }
-    }
-
-
-    fun openCamera() {
-        if (checkCameraPermission()) {
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.TITLE, "New Picture")
-                put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
-            }
-            imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-
-            if (imageUri != null) {
-                cameraLauncher.launch(imageUri)
-            } else {
-                Toast.makeText(this, "Failed to create image file", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            requestCameraPermission()
-        }
-        bindinge.image.setText("Selected Images: "+selectedImages.size)
-    }
-
-    private fun checkCameraPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this, Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private val cameraPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                openCamera()
-            } else {
-                Toast.makeText(this, "Camera permission denied!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    private fun requestCameraPermission() {
-        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-    }
 
     private fun getDate(): String {
         val calendar = Calendar.getInstance()
@@ -946,23 +818,52 @@ class BussinessForm : AppCompatActivity() {
             addProperty("deviceID", deviceID ?: "")
 
             addProperty("monthly_salary", safeString(bindinge.salaryOfEmploy.text))
-            addProperty("monthly_family_expenditure", safeString(bindinge.familymonthlyExpenditure.text))
+            addProperty(
+                "monthly_family_expenditure",
+                safeString(bindinge.familymonthlyExpenditure.text)
+            )
 
-            addProperty("family_status", spinnerfamilystatus.getOrNull(bindinge.spinnerFamilystatus.selectedItemPosition) ?: "")
-            addProperty("house_status", houseStatusOptions.getOrNull(bindinge.spinnerHouseStatus.selectedItemPosition) ?: "")
+            addProperty(
+                "family_status",
+                spinnerfamilystatus.getOrNull(bindinge.spinnerFamilystatus.selectedItemPosition)
+                    ?: ""
+            )
+            addProperty(
+                "house_status",
+                houseStatusOptions.getOrNull(bindinge.spinnerHouseStatus.selectedItemPosition) ?: ""
+            )
 
             addProperty("house_size", safeString(bindinge.editTextHouseSize.text))
-            addProperty("residence_at_address_since", safeString(bindinge.editTextResidenceSince.text))
+            addProperty(
+                "residence_at_address_since",
+                safeString(bindinge.editTextResidenceSince.text)
+            )
 
 
-            addProperty("prop_part_status", if (bindinge.ProprietorRadio.isChecked) "Proprietor" else "Partnership")
-            addProperty("business_care_taker_name", safeString(bindinge.businesscaretakersNameEditTest.text))
-            addProperty("business_care_taker_relation", safeString(bindinge.businesscaretakersRelationEditTest.text))
+            addProperty(
+                "prop_part_status",
+                if (bindinge.ProprietorRadio.isChecked) "Proprietor" else "Partnership"
+            )
+            addProperty(
+                "business_care_taker_name",
+                safeString(bindinge.businesscaretakersNameEditTest.text)
+            )
+            addProperty(
+                "business_care_taker_relation",
+                safeString(bindinge.businesscaretakersRelationEditTest.text)
+            )
 
-            addProperty("shop_status", shopStatusOptions.getOrNull(bindinge.spinnerShopStatus.selectedItemPosition) ?: "")
+            addProperty(
+                "shop_status",
+                shopStatusOptions.getOrNull(bindinge.spinnerShopStatus.selectedItemPosition) ?: ""
+            )
             addProperty("size_of_shop", safeString(bindinge.sizeofShop.text))
             addProperty("since_operating", safeString(bindinge.sinceOperating.text))
-            addProperty("area_status", spinnerSelectAreaAdapterOptions.getOrNull(bindinge.spinnerSelectArea.selectedItemPosition) ?: "")
+            addProperty(
+                "area_status",
+                spinnerSelectAreaAdapterOptions.getOrNull(bindinge.spinnerSelectArea.selectedItemPosition)
+                    ?: ""
+            )
             addProperty("about_buisness", safeString(bindinge.aboutBusiness.text))
             addProperty("shop_timings", safeString(bindinge.shopTimings.text))
             addProperty("holiday", safeString(bindinge.holidayIfAny.text))
@@ -971,10 +872,20 @@ class BussinessForm : AppCompatActivity() {
             addProperty("any_other_reg", safeString(bindinge.anyOtherRegistration.text))
 
             addProperty("proportion_of_sale_cash_basis", safeString(bindinge.proportioncCash.text))
-            addProperty("proportion_of_sale_cheque_basis", safeString(bindinge.proportioncCheque.text))
+            addProperty(
+                "proportion_of_sale_cheque_basis",
+                safeString(bindinge.proportioncCheque.text)
+            )
 
-            addProperty("office_setup_seen", if (bindinge.radioButtonOfficeSetup.isChecked) "Good" else "Average")
-            addProperty("business_setup", BusinessSetupOptions.getOrNull(bindinge.spinnerBusinessSetup.selectedItemPosition) ?: "")
+            addProperty(
+                "office_setup_seen",
+                if (bindinge.radioButtonOfficeSetup.isChecked) "Good" else "Average"
+            )
+            addProperty(
+                "business_setup",
+                BusinessSetupOptions.getOrNull(bindinge.spinnerBusinessSetup.selectedItemPosition)
+                    ?: ""
+            )
 
             addProperty("fixed_employee", safeString(bindinge.fixedEmp.text))
             addProperty("temp_employee", safeString(bindinge.temporaryEmp.text))
@@ -990,18 +901,30 @@ class BussinessForm : AppCompatActivity() {
 
             addProperty("as_per_ce_sale", safeString(bindinge.perCreditExecutiveSales.text))
             addProperty("as_per_ce_exp", safeString(bindinge.perCreditExecutiveExpenditure.text))
-            addProperty("as_per_ce_profit", safeString(bindinge.perCreditExecutiveMonthlyProfit.text))
+            addProperty(
+                "as_per_ce_profit",
+                safeString(bindinge.perCreditExecutiveMonthlyProfit.text)
+            )
             addProperty("net_profit_margin", safeString(bindinge.netProfitMargin.text))
 
             addProperty("pan_number", safeString(bindinge.panNumberEditText.text))
-            addProperty("name_board_seen", if (bindinge.OfficeNameBoardObservedRadio.isChecked) "Yes" else "No")
+            addProperty(
+                "name_board_seen",
+                if (bindinge.OfficeNameBoardObservedRadio.isChecked) "Yes" else "No"
+            )
 
-            addProperty("security_offered_against_loan", safeString(bindinge.securityOfferedEditText.text))
+            addProperty(
+                "security_offered_against_loan",
+                safeString(bindinge.securityOfferedEditText.text)
+            )
             addProperty("address_of_security", safeString(bindinge.addressOfSecurityEditText.text))
             addProperty("security_value", safeString(bindinge.valueOfSecurityEditText.text))
             addProperty("size_of_security", safeString(bindinge.editTextHouseSize.text))
 
-            addProperty("neighbour_check_status", if (bindinge.EnterNeighborCheckStatusone.isChecked) "Positive" else "Negative")
+            addProperty(
+                "neighbour_check_status",
+                if (bindinge.EnterNeighborCheckStatusone.isChecked) "Positive" else "Negative"
+            )
 
             // Use empty arrays instead of nulls for server safety
             addProperty("earning_family_members", safeJsonArray(familyIncomeDataJson))
@@ -1018,15 +941,15 @@ class BussinessForm : AppCompatActivity() {
             addProperty("image_name", srtarr.toString())
             addProperty("file_name", srtarr.toString())
 
-            if (bindinge.spinnerShopStatus.selectedItemPosition==1) {
+            if (bindinge.spinnerShopStatus.selectedItemPosition == 1) {
                 addProperty("value_of_shop", safeString(bindinge.shopStatusEditText.text))
-            }else if (bindinge.spinnerShopStatus.selectedItemPosition==2) {
+            } else if (bindinge.spinnerShopStatus.selectedItemPosition == 2) {
                 addProperty("rent_of_shop", safeString(bindinge.shopStatusEditText.text))
             }
 
-            if (bindinge.spinnerHouseStatus.selectedItemPosition==1) {
+            if (bindinge.spinnerHouseStatus.selectedItemPosition == 1) {
                 addProperty("value_of_house", safeString(bindinge.houseValueRentEditText.text))
-            }else if (bindinge.spinnerShopStatus.selectedItemPosition==2) {
+            } else if (bindinge.spinnerShopStatus.selectedItemPosition == 2) {
                 addProperty("rent_of_house", safeString(bindinge.houseValueRentEditText.text))
             }
         }
@@ -1034,7 +957,7 @@ class BussinessForm : AppCompatActivity() {
 
     fun setSubmitData() {
         try {
-            saveFormData(bindinge, case_id, this@BussinessForm,false)
+            saveFormData(bindinge, case_id, this@BussinessForm, false)
             deviceID = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
         } catch (e: Exception) {
             Log.e("SubmitData", "Error in saveFormData or getting deviceID", e)
@@ -1073,6 +996,7 @@ class BussinessForm : AppCompatActivity() {
                             titleText = "Success!"
                             contentText = "Details submitted successfully"
                             setConfirmText("OK")
+                            setCancelable(false)
                             setConfirmClickListener {
                                 it.dismissWithAnimation()
                                 startActivity(Intent(this@BussinessForm, MainActivity::class.java))
@@ -1083,6 +1007,13 @@ class BussinessForm : AppCompatActivity() {
                                 setBackgroundColor(Color.GREEN)
                                 setTextColor(Color.BLACK)
                             }
+                        }
+                        try {
+                            selectedImages.forEach {
+                                val deletedRows = contentResolver.delete(it, null, null)
+                            }
+                        } catch (e: Exception) {
+
                         }
                     }
                 } catch (e: JSONException) {
@@ -1535,7 +1466,12 @@ class BussinessForm : AppCompatActivity() {
         bindinge.buttonAddSupplierLayout.addView(loanCard)
     }
 
-    fun saveFormData(bindinge: ActivityBussnessFormBinding, case_id: String, context: Context,status:Boolean) {
+    fun saveFormData(
+        bindinge: ActivityBussnessFormBinding,
+        case_id: String,
+        context: Context,
+        status: Boolean
+    ) {
         val requestBody = JsonObject()
 
         requestBody.addProperty("case_id", case_id)
@@ -1562,7 +1498,10 @@ class BussinessForm : AppCompatActivity() {
         requestBody.addProperty("submitDate", getDate())
         requestBody.addProperty("deviceID", deviceID.toString())
         requestBody.addProperty("monthly_salary", bindinge.salaryOfEmploy.text.toString())
-        requestBody.addProperty("about_buisness_brief_note", bindinge.businessDetailsBrif.text.toString())
+        requestBody.addProperty(
+            "about_buisness_brief_note",
+            bindinge.businessDetailsBrif.text.toString()
+        )
         requestBody.addProperty(
             "monthly_family_expenditure", bindinge.familymonthlyExpenditure.text.toString()
         )
@@ -1681,7 +1620,8 @@ class BussinessForm : AppCompatActivity() {
                 ), SweetAlertDialog.SUCCESS_TYPE
             )
 
-            successDialog.setTitleText("Success!").setContentText("Details Saved").setConfirmText("OK")
+            successDialog.setTitleText("Success!").setContentText("Details Saved")
+                .setConfirmText("OK")
                 .setConfirmClickListener {
                     it.dismissWithAnimation()
 
@@ -1702,9 +1642,8 @@ class BussinessForm : AppCompatActivity() {
         }
     }
 
-    fun loadFormData(caseId: String, context: Context, bindinge: ActivityBussnessFormBinding)
-    {
-        try     {
+    fun loadFormData(caseId: String, context: Context, bindinge: ActivityBussnessFormBinding) {
+        try {
 
             val sharedPreferences =
                 context.getSharedPreferences("FormDataStorage", Context.MODE_PRIVATE)
@@ -1776,22 +1715,34 @@ class BussinessForm : AppCompatActivity() {
                     }
                 }
                 for (i in 0 until spinnerSelectAreaAdapterOptions.size) {
-                    if (data["area_status"] != null && data["area_status"].equals(spinnerSelectAreaAdapterOptions[i])) {
+                    if (data["area_status"] != null && data["area_status"].equals(
+                            spinnerSelectAreaAdapterOptions[i]
+                        )
+                    ) {
                         spinnerSelectAreaAdapterOptions_num = i
                     }
                 }
                 for (i in 0 until BusinessSetupOptions.size) {
-                    if (data["business_setup"] != null && data["business_setup"].equals(BusinessSetupOptions[i])) {
+                    if (data["business_setup"] != null && data["business_setup"].equals(
+                            BusinessSetupOptions[i]
+                        )
+                    ) {
                         BusinessSetupOptions_num = i
                     }
                 }
                 for (i in 0 until spinnerfamilystatus.size) {
-                    if (data["family_status"] != null && data["family_status"].equals(spinnerfamilystatus[i])) {
+                    if (data["family_status"] != null && data["family_status"].equals(
+                            spinnerfamilystatus[i]
+                        )
+                    ) {
                         spinnerfamilystatus_num = i
                     }
                 }
                 for (i in 0 until houseStatusOptions.size) {
-                    if (data["house_status"] != null && data["house_status"].equals(houseStatusOptions[i])) {
+                    if (data["house_status"] != null && data["house_status"].equals(
+                            houseStatusOptions[i]
+                        )
+                    ) {
                         houseStatusOptions_num = i
                     }
                 }
@@ -1870,7 +1821,8 @@ class BussinessForm : AppCompatActivity() {
 
                 setFamilyIncomeFieldsFromJsonArray()
                 // For radio buttons
-                bindinge.ProprietorRadio.isSelected = data["prop_part_status"]?.asString == "Proprietor"
+                bindinge.ProprietorRadio.isSelected =
+                    data["prop_part_status"]?.asString == "Proprietor"
                 bindinge.radioButtonOfficeSetup.isSelected =
                     data["office_setup_seen"]?.asString == "Good"
                 bindinge.OfficeNameBoardObservedRadio.isSelected =
@@ -1883,11 +1835,12 @@ class BussinessForm : AppCompatActivity() {
             } else {
                 Log.d("@@TAG", "No saved form data found for case_id: $caseId")
             }
-        } catch (e:Exception) {
+        } catch (e: Exception) {
 
         }
 
     }
+
     private fun setFamilyIncomeFieldsFromJsonArray() {
         familyincome = 0
         loans = 0
@@ -1958,5 +1911,286 @@ class BussinessForm : AppCompatActivity() {
         }
     }
 
+    private fun startCamera() {
+        bindinge.laoutCameraVisible.visibility = View.VISIBLE
+        bindinge.laoutCameraHide.visibility = View.GONE
 
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+        cameraProviderFuture.addListener({
+            try {
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+                // CameraX Preview Use Case
+                val preview = Preview.Builder()
+                    .build()
+                    .also { it.setSurfaceProvider(previewView.surfaceProvider) }
+
+                displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+                displayId = previewView.display.displayId
+
+                imageCapture = ImageCapture.Builder()
+                    .setTargetRotation(previewView.display.rotation)  // <--- Important
+                    .build()
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA  // Select back camera
+
+                try {
+                    // Unbind previous use cases and bind new ones
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Failed to start camera", Toast.LENGTH_SHORT).show()
+                    bindinge.laoutCameraVisible.visibility = View.GONE
+                    bindinge.laoutCameraHide.visibility = View.VISIBLE
+                }
+            } catch (e:Exception) {
+                Toast.makeText(this, "Failed to start camera", Toast.LENGTH_SHORT).show()
+                bindinge.laoutCameraVisible.visibility = View.GONE
+                bindinge.laoutCameraHide.visibility = View.VISIBLE
+            }
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    // Captures an image and saves it to the gallery
+    private fun captureImage() {
+        val imageCapture = imageCapture ?: return
+
+        // Create a unique filename using timestamp
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "IMG_$timestamp.jpg")
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    "Pictures/CameraX-Images"
+                )  // Save to gallery
+            }
+        }
+
+        val rotation = windowManager.defaultDisplay.rotation
+        imageCapture.targetRotation = rotation
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ).build()
+
+
+        // Capture and save the image
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+//                    bindinge.laoutCameraVisible.visibility = View.GONE
+//                    bindinge.laoutCameraHide.visibility = View.VISIBLE
+//
+                    imageUri = outputFileResults.savedUri
+//                    Toast.makeText(this@SalaryForm, "Image captured: $imageUri", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this@SalaryForm, "Image captured "+  (selectedImages.size+1), Toast.LENGTH_SHORT).show()
+                    if (imageUri != null) {
+
+                        selectedImages.add(imageUri!!)
+                        imageAdapter.notifyDataSetChanged()
+                        imageAdapter1.notifyDataSetChanged()
+                        bindinge.image.setText("Selected Images: " + (selectedImages.size))
+                    }
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Toast.makeText(this@BussinessForm, "Failed to save image", Toast.LENGTH_SHORT)
+                        .show()
+                    bindinge.laoutCameraVisible.visibility = View.GONE
+                    bindinge.laoutCameraHide.visibility = View.VISIBLE
+                }
+            }
+        )
+    }
+
+    override fun onBackPressed() {
+        if (bindinge.laoutCameraVisible.isVisible) {
+            bindinge.laoutCameraVisible.visibility = View.GONE
+            bindinge.laoutCameraHide.visibility = View.VISIBLE
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+    }
+
+    private lateinit var previewView: PreviewView  // Displays the camera preview
+    private lateinit var captureButton: ImageView  // Button to capture image
+    private var imageCapture: ImageCapture? = null
+    private lateinit var displayManager: DisplayManager
+    private var displayId: Int = -1
+
+    fun openCamera() {
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            checkPermissionsCamera()
+        }
+    }
+
+    fun allPermissionsGranted(): Boolean {
+        // Iterate through the permissions in REQUIRED_PERMISSIONS
+        for (permission in REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false // Return false if any permission is not granted
+            }
+        }
+        return true // Return true if all permissions are granted
+    }
+
+    private val REQUIRED_PERMISSIONS = mutableListOf(
+        Manifest.permission.CAMERA
+    ).apply {
+        // For Android 9 (Pie) or lower
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        // For Android 10 (Q) to Android 12 (S)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_EXTERNAL_STORAGE) // Read external storage (for backward compatibility)
+        }
+
+        // For Android 13 (Tiramisu) and higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_MEDIA_IMAGES)
+        }
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }.toTypedArray()
+
+    private fun checkPermissionsCamera() {
+        val permissionsNeeded = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            // Show the permission explanation dialog
+            showPermissionExplanationDialog(permissionsNeeded)
+        } else {
+            openCamera()
+        }
+    }
+
+    private fun showPermissionExplanationDialog(permissionsNeeded: List<String>) {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Needed")
+            .setMessage("We need these permissions to ensure full functionality. Please grant the required permissions.")
+            .setPositiveButton("Grant") { _, _ ->
+                // Request the permissions if user agrees
+                ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), REQUEST_CODE)
+            }
+            .setNegativeButton("Deny") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    // Handle the result of the permission request
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE) {
+            val deniedPermissions = mutableListOf<String>()
+            val permanentlyDeniedPermissions = mutableListOf<String>()
+
+            for ((index, permission) in permissions.withIndex()) {
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                    deniedPermissions.add(permission)
+
+                    // Check if the user denied the permission permanently
+//                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+//                        permanentlyDeniedPermissions.add(permission)
+//                    }
+                }
+            }
+            if (deniedPermissions.isNotEmpty()) {
+                // Show the dialog again or take other actions
+
+                permissionCount++
+                if (permissionCount == 5) {
+                    permissionCount=0;
+                    showGoToSettingsDialog()
+                } else {
+                    showPermissionExplanationDialog {
+                        // User agrees, request permissions again
+                        ActivityCompat.requestPermissions(this, deniedPermissions.toTypedArray(),
+                            REQUEST_CODE
+                        )
+                    }
+                }
+            }
+
+        }
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getLastLocation()
+            } else {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                        this, Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                ) {
+                    // "Don't ask again" selected
+                    showSettingsDialog()
+                } else {
+                    Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+    }
+    private fun showPermissionExplanationDialog(onPositiveClick: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Needed")
+            .setMessage("We need these permissions to provide full functionality. Please allow them.")
+            .setPositiveButton("Allow") { _, _ -> onPositiveClick() }
+            .setNegativeButton("Deny") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
+    }
+    var permissionCount=0;
+    private fun showSettingsDialog() {
+        AlertDialog.Builder(this).setTitle("Permission Required")
+            .setMessage("You have denied location permission. Please enable it in settings.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                openAppSettings()
+            }.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+                Toast.makeText(this, "Permission still denied!", Toast.LENGTH_SHORT).show()
+                finish();
+            }.show()
+    }
+    // Show dialog directing the user to settings if they permanently denied the permissions
+    private fun showGoToSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Denied Permanently")
+            .setMessage("You have permanently denied the required permissions. Please go to settings and enable them manually.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                // Direct user to the app settings
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri: Uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private val REQUEST_CODE = 100
 }

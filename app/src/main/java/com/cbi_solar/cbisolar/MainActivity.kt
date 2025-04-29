@@ -1,15 +1,23 @@
 package com.cbi_solar.cbisolar
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
@@ -389,8 +397,26 @@ class MainActivity : AppCompatActivity() {
             pending = isChecked
             filter()
         }
-    }
 
+
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            checkAndRequestPermissions(this@MainActivity)
+//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            // Android 10 to 12 (API 29 - 32)
+//            // Use MediaStore or SAF for read/write access
+//            checkPermissions()
+//        } else {
+//            checkPermissions()
+//        }
+        checkPermissions()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+        } else {
+
+        }
+    }
+// 89529 39557
     var completed=false;
     var pending=false;
 
@@ -561,4 +587,125 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+    private val REQUIRED_PERMISSIONS = mutableListOf(
+        Manifest.permission.CAMERA
+    ).apply {
+        // For Android 9 (Pie) or lower
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        // For Android 10 (Q) to Android 12 (S)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_EXTERNAL_STORAGE) // Read external storage (for backward compatibility)
+        }
+
+        // For Android 13 (Tiramisu) and higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_MEDIA_IMAGES)
+        }
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }.toTypedArray()
+
+    private fun checkPermissions() {
+        val permissionsNeeded = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            // Show a dialog explaining the need for permissions
+            showPermissionExplanationDialog {
+                // User agrees, request permissions
+                ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), REQUEST_CODE)
+            }
+        }
+    }
+
+    private fun showPermissionExplanationDialog(onPositiveClick: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Needed")
+            .setMessage("We need these permissions to provide full functionality. Please allow them.")
+            .setPositiveButton("Allow") { _, _ -> onPositiveClick() }
+            .setNegativeButton("Deny") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
+    }
+
+    // Handle the result of the permission request
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE) {
+            val deniedPermissions = mutableListOf<String>()
+            for ((index, permission) in permissions.withIndex()) {
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                    deniedPermissions.add(permission)
+                }
+            }
+
+            if (deniedPermissions.isNotEmpty()) {
+                // Show the dialog again or take other actions
+
+                permissionCount++
+                if (permissionCount == 2) {
+                    permissionCount=0;
+                    showGoToSettingsDialog()
+                } else {
+
+                    showPermissionExplanationDialog {
+                        // User agrees, request permissions again
+                        ActivityCompat.requestPermissions(this, deniedPermissions.toTypedArray(), REQUEST_CODE)
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CODE = 100
+    }
+
+    private val mediaPermissions = arrayOf(
+        Manifest.permission.READ_MEDIA_IMAGES,
+        Manifest.permission.READ_MEDIA_VIDEO,
+        Manifest.permission.READ_MEDIA_AUDIO
+    )
+
+    var permissionCount=0;
+    private fun showGoToSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Denied Permanently")
+            .setMessage("You have permanently denied the required permissions. Please go to settings and enable them manually.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                // Direct user to the app settings
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri: Uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
+    fun checkAndRequestPermissions(activity: Activity) {
+        val permissionsToRequest = mediaPermissions.filter {
+            ContextCompat.checkSelfPermission(activity, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                activity,
+                permissionsToRequest.toTypedArray(),
+                100
+            )
+        } else {
+            // Permissions already granted
+        }
+    }
+
 }

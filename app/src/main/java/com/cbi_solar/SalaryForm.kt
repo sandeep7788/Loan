@@ -1,6 +1,5 @@
 package com.cbi_solar
 
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -16,13 +15,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
+import android.hardware.display.DisplayManager
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -39,19 +39,24 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.cbi_solar.cbisolar.MainActivity
+import com.cbi_solar.cbisolar.MainActivity.Companion
 import com.cbi_solar.cbisolar.R
 import com.cbi_solar.cbisolar.Utility
 import com.cbi_solar.cbisolar.databinding.ActivitySalaryFormBinding
@@ -81,10 +86,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-lateinit var binding: ActivitySalaryFormBinding
-private var loans = 0;
-private var bankdetails = 0;
-private var familyincome = 0;
 
 class SalaryForm : AppCompatActivity() {
 
@@ -92,9 +93,14 @@ class SalaryForm : AppCompatActivity() {
     var srtarr: StringBuilder = StringBuilder()
     var latitudeTextView: Double? = null
     var longitudeTextView: Double? = null
-    var addressTextView: String? = " "
+    var addressString: String? = " "
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    var PERMISSION_ID: Int = 44
+
+    lateinit var binding: ActivitySalaryFormBinding
+    private var loans = 0;
+    private var bankdetails = 0;
+    private var familyincome = 0;
+
     var TAG = "@@TAG"
 
     fun uploadImage(uri: Uri) {
@@ -140,9 +146,6 @@ class SalaryForm : AppCompatActivity() {
                             "@@TAG",
                             "onResponse: " + response.body() + " " + count + " " + selectedImages.size
                         )
-                        Toast.makeText(
-                            this@SalaryForm, "" + response.body(), Toast.LENGTH_LONG
-                        ).show()
 
                         val jsonObject = JSONObject(response.body().toString())
 
@@ -192,16 +195,19 @@ class SalaryForm : AppCompatActivity() {
 
     private val selectedImages = ArrayList<Uri>()
     private lateinit var imageAdapter: ImageAdapter
-    val CAMERA_PERMISSION_CODE = 100
+    private lateinit var imageAdapter1: ImageAdapter1
     val spinnerfamilystatus = arrayOf("Select Family Status", "Joint Family", "Nuclear Family")
     val houseStatusOptions = arrayOf("Select House Status", "Owned", "Rented")
     lateinit var houseStatusAdapter: ArrayAdapter<String>
     lateinit var Adapter_spinnerfamilystatus: ArrayAdapter<String>
 
-    @SuppressLint("UseCheckPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_salary_form)
+
+        window.decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+
 
         if (intent.extras != null) {
             case_id = intent.getStringExtra("case_id").toString()
@@ -212,8 +218,7 @@ class SalaryForm : AppCompatActivity() {
         val adapter = ArrayAdapter(this, R.layout.list_item, employmentStatusOptions)
         binding.spinnerHouseStatus.setAdapter(adapter)
 
-        houseStatusAdapter =
-            ArrayAdapter(this, R.layout.simple_spinner_item, houseStatusOptions)
+        houseStatusAdapter = ArrayAdapter(this, R.layout.simple_spinner_item, houseStatusOptions)
         houseStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerHouseStatus.adapter = houseStatusAdapter
 
@@ -255,7 +260,6 @@ class SalaryForm : AppCompatActivity() {
         }
         binding.buttonAddFamilyIncome.setOnClickListener {
             addFamilyIncomeField("", "", "")
-
         }
         binding.buttonAddBank.setOnClickListener {
             addBackField("", "", "", "")
@@ -333,9 +337,7 @@ class SalaryForm : AppCompatActivity() {
         val storage: TextView? = findViewById(R.id.storage)
 
         storage?.setOnClickListener {
-            checkPermission(
-                Manifest.permission.READ_EXTERNAL_STORAGE, CAMERA_PERMISSION_CODE
-            )
+            checkPermissionsCamera()
             binding.image.setText("Selected Images: " + selectedImages.size)
         }
 
@@ -343,6 +345,11 @@ class SalaryForm : AppCompatActivity() {
         binding.recyclerViewImages.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerViewImages.adapter = imageAdapter
+
+        imageAdapter1 = ImageAdapter1(selectedImages)
+        binding.recyclerViewImages1.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerViewImages1.adapter = imageAdapter1
 
         setlocation()
         Handler(Looper.getMainLooper()).postDelayed({
@@ -362,6 +369,19 @@ class SalaryForm : AppCompatActivity() {
             saveFormData(binding, case_id, this@SalaryForm, true)
         }
         loadFormData(case_id)
+
+        previewView = binding.previewView
+        captureButton = binding.captureButton
+        captureButton.setOnClickListener {
+            captureImage()
+            binding.laoutCameraVisible.visibility = View.VISIBLE
+            binding.laoutCameraHide.visibility = View.GONE
+        }
+
+        binding.done.setOnClickListener {
+            binding.laoutCameraVisible.visibility = View.GONE
+            binding.laoutCameraHide.visibility = View.VISIBLE
+        }
     }
 
     lateinit var progressDialog: SweetAlertDialog
@@ -382,17 +402,16 @@ class SalaryForm : AppCompatActivity() {
                 val country = addresses[0].countryName        // Country
                 addLat = lat.toString()
                 addLong = lon.toString()
-                addAddress = "Address: $address\nCity: $city\nCountry: $country"
-
-                addressTextView = "Address: $address\nCity: $city\nCountry: $country"
+                addAddress = "Address: $address\n City: $city\n Country: $country "
+                addressString = "Address: $address\n City: $city\n Country: $country "
             } else {
-                addressTextView = "Location not found!"
+                addressString = "Location not found!"
             }
-//            Toast.makeText(this, "addressTextView "+addressTextView, Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "addressString "+addressString, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             e.printStackTrace()
             Log.e("@@TAG", "getAddressFromLocation: " + e.message)
-            addressTextView = "Error fetching location"
+            addressString = "Error fetching location"
         }
 
     }
@@ -504,57 +523,46 @@ class SalaryForm : AppCompatActivity() {
 
         if (isEmptyField(case_id, "Case ID is required")) return false
         if (isEmptyField(
-                binding.loanAmountEditText.text.toString(),
-                "Loan amount is required"
+                binding.loanAmountEditText.text.toString(), "Loan amount is required"
             )
         ) return false
         if (isEmptyField(
-                binding.visitedAddress.text.toString(),
-                "Visited address is required"
+                binding.visitedAddress.text.toString(), "Visited address is required"
             )
         ) return false
         if (isEmptyField(
-                binding.txtVisitedDate.text.toString(),
-                "Date of visit is required"
+                binding.txtVisitedDate.text.toString(), "Date of visit is required"
             )
         ) return false
         if (isEmptyField(
-                binding.visitedTime.text.toString(),
-                "Visit time is required"
+                binding.visitedTime.text.toString(), "Visit time is required"
             )
         ) return false
         if (isEmptyField(
-                binding.persontmeetnameEditText.text.toString(),
-                "Person met is required"
+                binding.persontmeetnameEditText.text.toString(), "Person met is required"
             )
         ) return false
         if (isEmptyField(
-                binding.loanPurposeEditText.text.toString(),
-                "Loan purpose is required"
+                binding.loanPurposeEditText.text.toString(), "Loan purpose is required"
             )
         ) return false
         if (isEmptyField(
-                binding.orgnization.text.toString(),
-                "Name of organization is required"
+                binding.orgnization.text.toString(), "Name of organization is required"
             )
         ) return false
         if (isEmptyField(
-                binding.workexprience.text.toString(),
-                "Work experience is required"
+                binding.workexprience.text.toString(), "Work experience is required"
             )
         ) return false
         if (isEmptyField(binding.education.text.toString(), "Education is required")) return false
         if (isEmptyField(
-                binding.numberoffamilynumber.text.toString(),
-                "Number of family members is required"
+                binding.numberoffamilynumber.text.toString(), "Number of family members is required"
             )
         ) return false
 
         if (addLat == null || addLong == null || addAddress.isNullOrEmpty()) {
             Toast.makeText(
-                context,
-                "Location details (lat/long/address) are missing",
-                Toast.LENGTH_SHORT
+                context, "Location details (lat/long/address) are missing", Toast.LENGTH_SHORT
             ).show()
             return false
         }
@@ -573,43 +581,35 @@ class SalaryForm : AppCompatActivity() {
             return false
         }
         if (isEmptyField(
-                binding.editTextHouseSize.text.toString(),
-                "House size is required"
+                binding.editTextHouseSize.text.toString(), "House size is required"
             )
         ) return false
         if (isEmptyField(
-                binding.editTextResidenceSince.text.toString(),
-                "Residence since is required"
+                binding.editTextResidenceSince.text.toString(), "Residence since is required"
             )
         ) return false
         if (isEmptyField(
-                binding.houseValueRentEditText.text.toString(),
-                "Value/Rent of house is required"
+                binding.houseValueRentEditText.text.toString(), "Value/Rent of house is required"
             )
         ) return false
         if (isEmptyField(
-                binding.grossSalaryEditText.text.toString(),
-                "Gross salary is required"
+                binding.grossSalaryEditText.text.toString(), "Gross salary is required"
             )
         ) return false
         if (isEmptyField(
-                binding.netSalaryEditText.text.toString(),
-                "Net salary is required"
+                binding.netSalaryEditText.text.toString(), "Net salary is required"
             )
         ) return false
         if (isEmptyField(
-                binding.currentPositionEditText.text.toString(),
-                "Current position is required"
+                binding.currentPositionEditText.text.toString(), "Current position is required"
             )
         ) return false
         if (isEmptyField(
-                binding.txtDateofjoin.text.toString(),
-                "Date of joining is required"
+                binding.txtDateofjoin.text.toString(), "Date of joining is required"
             )
         ) return false
         if (isEmptyField(
-                binding.otherIncomeEditText.text.toString(),
-                "Other income is required"
+                binding.otherIncomeEditText.text.toString(), "Other income is required"
             )
         ) return false
         if (isEmptyField(
@@ -618,58 +618,47 @@ class SalaryForm : AppCompatActivity() {
             )
         ) return false
         if (isEmptyField(
-                binding.officeTimingsEditText.text.toString(),
-                "Office timings are required"
+                binding.officeTimingsEditText.text.toString(), "Office timings are required"
             )
         ) return false
         if (isEmptyField(
-                binding.holidayEditText.text.toString(),
-                "Holiday info is required"
+                binding.holidayEditText.text.toString(), "Holiday info is required"
             )
         ) return false
         if (isEmptyField(
-                binding.panNumberEditText.text.toString(),
-                "PAN number is required"
+                binding.panNumberEditText.text.toString(), "PAN number is required"
             )
         ) return false
         if (isEmptyField(
-                binding.employerNameEditText.text.toString(),
-                "Employer name is required"
+                binding.employerNameEditText.text.toString(), "Employer name is required"
             )
         ) return false
         if (isEmptyField(
-                binding.employerNumberEditText.text.toString(),
-                "Employer mobile no is required"
+                binding.employerNumberEditText.text.toString(), "Employer mobile no is required"
             )
         ) return false
         if (isEmptyField(
-                binding.coEmployeeNameEditText.text.toString(),
-                "Co-employee name is required"
+                binding.coEmployeeNameEditText.text.toString(), "Co-employee name is required"
             )
         ) return false
         if (isEmptyField(
-                binding.coEmployeeNumber.text.toString(),
-                "Co-employee mobile no is required"
+                binding.coEmployeeNumber.text.toString(), "Co-employee mobile no is required"
             )
         ) return false
         if (isEmptyField(
-                binding.securityOfferedEditText.text.toString(),
-                "Security offered is required"
+                binding.securityOfferedEditText.text.toString(), "Security offered is required"
             )
         ) return false
         if (isEmptyField(
-                binding.addressOfSecurityEditText.text.toString(),
-                "Address of security is required"
+                binding.addressOfSecurityEditText.text.toString(), "Address of security is required"
             )
         ) return false
         if (isEmptyField(
-                binding.valueOfSecurityEditText.text.toString(),
-                "Security value is required"
+                binding.valueOfSecurityEditText.text.toString(), "Security value is required"
             )
         ) return false
         if (isEmptyField(
-                binding.editTextHouseSize.text.toString(),
-                "Size of security is required"
+                binding.editTextHouseSize.text.toString(), "Size of security is required"
             )
         ) return false
         if (familyIncomeDataArray.size() == 0) {
@@ -693,53 +682,12 @@ class SalaryForm : AppCompatActivity() {
         return true
     }
 
-    private fun checkPermission(permission: String, requestCode: Int) {
+    private fun checkAndOpenCamera(permission: String, requestCode: Int) {
         if (ContextCompat.checkSelfPermission(
                 this@SalaryForm, permission
             ) == PackageManager.PERMISSION_DENIED
         ) {
-
-            // Requesting the permission
             ActivityCompat.requestPermissions(this@SalaryForm, arrayOf(permission), requestCode)
-        } else {
-//            openImagePicker()
-            openCamera()
-//            Toast.makeText(this@SalaryForm, "Permission already granted", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this@SalaryForm, "Camera Permission Granted", Toast.LENGTH_SHORT)
-                    .show()
-//                openImagePicker()
-                openCamera()
-            } else {
-                Toast.makeText(this@SalaryForm, "Camera Permission Denied", Toast.LENGTH_SHORT)
-                    .show()
-                finish()
-            }
-        }
-        if (requestCode == PERMISSION_ID) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLastLocation()
-            } else {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                        this, Manifest.permission.ACCESS_FINE_LOCATION
-                    )
-                ) {
-                    // "Don't ask again" selected
-                    showSettingsDialog()
-                } else {
-                    Toast.makeText(this, "Location Permission denied!", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
         }
     }
 
@@ -769,56 +717,83 @@ class SalaryForm : AppCompatActivity() {
         }
     }
 
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-            if (uris.isNotEmpty()) {
-//                selectedImages.clear()
+    fun Float.toPx(context: Context): Float {
+        return this * context.resources.displayMetrics.scaledDensity
+    }
 
 
-                selectedImages.addAll(uris)
-                imageAdapter.notifyDataSetChanged()  // Refresh RecyclerView
-                binding.image.setText("Selected Images: "+selectedImages.size)
-            }
+    fun getCorrectlyOrientedBitmap(imagePath: String): Bitmap {
+        val originalBitmap = BitmapFactory.decodeFile(imagePath)
+        val exif = ExifInterface(imagePath)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
         }
 
+        return Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
+    }
+
+
     fun addTimestampToImage(file: File) {
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        var bitmap = BitmapFactory.decodeFile(file.absolutePath)
             ?: throw IllegalArgumentException("Invalid image file")
 
-        val tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        // Correct the image orientation first (fix rotation if needed)
+        val bitmap1 = getCorrectlyOrientedBitmap(file.absolutePath)
+        val width = bitmap1.width
+        val height = bitmap1.height
+
+        if (width > height) {
+            Log.d("@@ImageCheck", "Landscape image")
+        } else if (height > width) {
+            Log.d("@@ImageCheck", "Portrait image")
+        } else {
+            Log.d("@@ImageCheck", "Square image")
+        }
+
+        bitmap = rotateImageIfRequired(bitmap, file)
+
+
+
+        var tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(tempBitmap)
 
         val textPaint = Paint().apply {
             color = Color.WHITE
-            textSize = 80f
+            textSize = 10f.toPx(this@SalaryForm)
             typeface = Typeface.DEFAULT_BOLD
             isAntiAlias = true
+            textAlign = Paint.Align.CENTER
         }
 
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()) + " lat:" + addLat + " long:" + addLat
-        val addressText = addressTextView.toString().substring(0, addressTextView.toString().length-1 /2)
-        val extraInfo = addressTextView.toString().substring(addressTextView.toString().length /2, addressTextView.toString().length-1)
+        val timeStamp = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
+        ).format(Date())
 
-        val padding = 20f
-        val lineSpacing = 10f
+        val line1 = timeStamp
+        val line2 = "Lat: $addLat" + " Long: $addLong"
+        val line3 = addressString.toString().subSequence(0, addressString.toString().length / 2)
+        val line4 = addressString.toString()
+            .subSequence(addressString.toString().length / 2, addressString.toString().length - 1)
 
-        val boundsAddress = Rect()
-        val boundsTimestamp = Rect()
-        val boundsExtra = Rect()
+        val lines = listOf(line1, line2, line3, line4)
 
-        textPaint.getTextBounds(addressText, 0, addressText.length, boundsAddress)
-        textPaint.getTextBounds(timeStamp, 0, timeStamp.length, boundsTimestamp)
-        textPaint.getTextBounds(extraInfo, 0, extraInfo.length, boundsExtra)
+        val padding = 30f
+        val lineSpacing = 20f
 
-        val maxTextWidth = maxOf(boundsAddress.width(), boundsTimestamp.width(), boundsExtra.width())
-        val totalTextHeight = boundsAddress.height() + boundsTimestamp.height() + boundsExtra.height() + (2 * lineSpacing)
+        val textHeight = textPaint.fontMetrics.bottom - textPaint.fontMetrics.top
+        val totalTextHeight = lines.size * textHeight + (lines.size - 1) * lineSpacing
 
-        val x = tempBitmap.width - maxTextWidth - padding
-        val yStart = tempBitmap.height - totalTextHeight - padding
+        val centerX = tempBitmap.width / 2f
+        val startY = tempBitmap.height - totalTextHeight - padding
 
-        val rectLeft = x - padding
-        val rectTop = yStart - padding
-        val rectRight = x + maxTextWidth + padding
+        val rectLeft = 0f
+        val rectTop = startY - padding
+        val rectRight = tempBitmap.width.toFloat()
         val rectBottom = tempBitmap.height.toFloat()
 
         val backgroundPaint = Paint().apply {
@@ -826,157 +801,48 @@ class SalaryForm : AppCompatActivity() {
             alpha = 150
         }
 
+        // Draw background rectangle
         canvas.drawRect(rectLeft, rectTop, rectRight, rectBottom, backgroundPaint)
 
-        val yAddress = yStart + boundsAddress.height()
-        val yTimestamp = yAddress + boundsTimestamp.height() + lineSpacing
-        val yExtra = yTimestamp + boundsExtra.height() + lineSpacing
-
-        canvas.drawText(addressText, x, yAddress, textPaint)
-        canvas.drawText(timeStamp, x, yTimestamp, textPaint)
-        canvas.drawText(extraInfo, x, yExtra, textPaint)
+        var y = startY
+        for (line in lines) {
+            y += textHeight
+            canvas.drawText(line.toString(), centerX, y, textPaint)
+            y += lineSpacing
+        }
 
         FileOutputStream(file).use { out ->
-            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        }
+
+//        tempBitmap = rotateImage(tempBitmap, 180f)
+//        FileOutputStream(file).use { out ->
+//            tempBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+//        }
+
+//        bitmap = rotateImageIfRequired(bitmap, file)
+    }
+
+    fun rotateImageIfRequired(img: Bitmap, selectedFile: File): Bitmap {
+        val ei = ExifInterface(selectedFile.absolutePath)
+        val orientation =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+            else -> img
         }
     }
 
-
-    /*
-        fun addTimestampToImage(file: File) {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                ?: throw IllegalArgumentException("Invalid image file")
-
-            val tempBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            val canvas = Canvas(tempBitmap)
-
-            // Set up Paint for text
-            val textPaint = Paint().apply {
-                color = Color.WHITE
-                textSize = 80f
-                typeface = Typeface.DEFAULT_BOLD
-                isAntiAlias = true
-            }
-
-            val textBounds = Rect()
-            textPaint.getTextBounds(addressTextView, 0, addressTextView!!.length, textBounds)
-
-            // Define position (bottom-right)
-            val padding = 20f
-            val x = tempBitmap.width - textBounds.width() - padding
-            val y = tempBitmap.height - padding
-
-            // Draw a transparent black background rectangle
-            val backgroundPaint = Paint().apply {
-                color = Color.BLACK
-                alpha = 150 // Adjust transparency (0 = fully transparent, 255 = solid black)
-            }
-            val rectLeft = x - padding
-            val rectTop = y - textBounds.height() - padding
-            val rectRight = x + textBounds.width() + padding
-            val rectBottom = y + padding
-
-            canvas.drawRect(rectLeft, rectTop, rectRight, rectBottom, backgroundPaint)
-
-            // Draw timestamp on top of the background
-            canvas.drawText(addressTextView.toString(), x, y, textPaint)
-
-            // Overwrite the original file
-            FileOutputStream(file).use { out ->
-                tempBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-            }
-        }
-    */
-
-    private fun openImagePicker() {
-        imagePickerLauncher.launch("image/*")
+    fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
     }
 
     private var imageUri: Uri? = null
-    lateinit var arr: ArrayList<String>
-
-    private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success && imageUri != null) {
-                // Image successfully captured
-                Toast.makeText(this, "Image captured: $imageUri", Toast.LENGTH_SHORT).show()
-                if (imageUri != null) {
-
-                    selectedImages.add(imageUri!!)
-                    imageAdapter.notifyDataSetChanged()
-                    binding.image.setText("Selected Images: "+selectedImages.size)
-                } else {
-                    Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-    private fun ensureCorrectOrientation(context: Context, bitmap: Bitmap): Bitmap {
-        val matrix = Matrix()
-        val orientation = ExifInterface.ORIENTATION_NORMAL
-
-        // Modify the matrix based on the EXIF orientation
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
-        }
-
-        return if (matrix.isIdentity) {
-            bitmap // No rotation needed, return as is
-        } else {
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        }
-    }
-
-
-    fun openCamera() {
-        if (checkCameraPermission()) {
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.TITLE, "New Picture")
-                put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
-            }
-            imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-
-            if (imageUri != null) {
-                cameraLauncher.launch(imageUri)
-            } else {
-                Toast.makeText(this, "Failed to create image file", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            requestCameraPermission()
-        }
-    }
-
-    private fun checkCameraPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this, Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private val cameraPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                openCamera()
-            } else {
-                Toast.makeText(this, "Camera permission denied!", Toast.LENGTH_SHORT).show()
-                showCameraSettingsDialog()
-            }
-        }
-    private fun showCameraSettingsDialog() {
-        AlertDialog.Builder(this).setTitle("Permission Required")
-            .setMessage("You have denied camera permission. Please enable it in settings.")
-            .setPositiveButton("Go to Settings") { _, _ ->
-                openAppSettings()
-            }.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-                Toast.makeText(this, "Permission still denied!", Toast.LENGTH_SHORT).show()
-                finish();
-            }.show()
-    }
-    private fun requestCameraPermission() {
-        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-    }
 
     var case_id = "";
     var addLat = "";
@@ -1007,7 +873,7 @@ class SalaryForm : AppCompatActivity() {
 
         try {
             deviceID = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
-            saveFormData(binding, case_id, this@SalaryForm,false)
+            saveFormData(binding, case_id, this@SalaryForm, false)
         } catch (e: Exception) {
         }
 
@@ -1122,9 +988,11 @@ class SalaryForm : AppCompatActivity() {
         requestBody.addProperty("image_name", srtarr.toString())
         requestBody.addProperty("file_name", srtarr.toString())
 
-        if (binding.spinnerHouseStatus.selectedItemPosition==1) {
-            requestBody.addProperty("value_of_house", binding.houseValueRentEditText.text.toString())
-        }else if (binding.spinnerHouseStatus.selectedItemPosition==2) {
+        if (binding.spinnerHouseStatus.selectedItemPosition == 1) {
+            requestBody.addProperty(
+                "value_of_house", binding.houseValueRentEditText.text.toString()
+            )
+        } else if (binding.spinnerHouseStatus.selectedItemPosition == 2) {
             requestBody.addProperty("rent_of_house", binding.houseValueRentEditText.text.toString())
         }
 
@@ -1177,7 +1045,8 @@ class SalaryForm : AppCompatActivity() {
                                 )
                                 finish()
 
-                            }.show()
+                            }.setCancelable(false);
+                        successDialog.show();
 
 //                        successDialog.setOnShowListener {
                         val confirmButton =
@@ -1201,8 +1070,16 @@ class SalaryForm : AppCompatActivity() {
 //
 //                        dialog.show()
 
+                        try {
+                            selectedImages.forEach {
+                                contentResolver.delete(it, null, null)
+                            }
+                        } catch (e: Exception) {
+
+                        }
 
                     }
+
                 } catch (e: JSONException) {
                     Log.e("@@TAG", "onResponse: " + e.message)
                     e.printStackTrace()
@@ -1274,7 +1151,9 @@ class SalaryForm : AppCompatActivity() {
         dpd.show()
     }
 
-    fun saveFormData(bindinge: ActivitySalaryFormBinding, case_id: String, context: Context, status: Boolean) {
+    fun saveFormData(
+        bindinge: ActivitySalaryFormBinding, case_id: String, context: Context, status: Boolean
+    ) {
         val requestBody = JsonObject()
 
         requestBody.addProperty("case_id", case_id)
@@ -1288,7 +1167,9 @@ class SalaryForm : AppCompatActivity() {
         requestBody.addProperty("work_experience", binding.workexprience.text.toString())
         requestBody.addProperty("education", binding.education.text.toString())
         requestBody.addProperty("remark", binding.remarkText.text.toString())
-        requestBody.addProperty("number_of_family_members", binding.numberoffamilynumber.text.toString())
+        requestBody.addProperty(
+            "number_of_family_members", binding.numberoffamilynumber.text.toString()
+        )
         requestBody.addProperty("lat", addLat)
         requestBody.addProperty("long", addLong)
         requestBody.addProperty("location", addAddress)
@@ -1299,31 +1180,59 @@ class SalaryForm : AppCompatActivity() {
         // 🔹 Missing Fields from Salary Form
         requestBody.addProperty("gross_salary", binding.grossSalaryEditText.text.toString())
         requestBody.addProperty("net_salary", binding.netSalaryEditText.text.toString())
-        requestBody.addProperty("current_position_of_employee", binding.currentPositionEditText.text.toString())
+        requestBody.addProperty(
+            "current_position_of_employee", binding.currentPositionEditText.text.toString()
+        )
         requestBody.addProperty("date_of_joining", binding.txtDateofjoin.text.toString())
-        requestBody.addProperty("other_income_of_applicant", binding.otherIncomeEditText.text.toString())
-        requestBody.addProperty("previous_employement_details", binding.previousEmploymentEditText.text.toString())
+        requestBody.addProperty(
+            "other_income_of_applicant", binding.otherIncomeEditText.text.toString()
+        )
+        requestBody.addProperty(
+            "previous_employement_details", binding.previousEmploymentEditText.text.toString()
+        )
         requestBody.addProperty("office_timings", binding.officeTimingsEditText.text.toString())
         requestBody.addProperty("employer_name", binding.employerNameEditText.text.toString())
-        requestBody.addProperty("employer_mobile_no", binding.employerNumberEditText.text.toString())
+        requestBody.addProperty(
+            "employer_mobile_no", binding.employerNumberEditText.text.toString()
+        )
         requestBody.addProperty("co_employee_name", binding.coEmployeeNameEditText.text.toString())
         requestBody.addProperty("co_employee_mobile_no", binding.coEmployeeNumber.text.toString())
-        requestBody.addProperty("salary_received", if (binding.SalaryReceivedInone.isSelected) "Bank" else "Cash")
+        requestBody.addProperty(
+            "salary_received", if (binding.SalaryReceivedInone.isSelected) "Bank" else "Cash"
+        )
 
-        requestBody.addProperty("monthly_family_expenditure", binding.familymonthlyExpenditure.text.toString())
-        requestBody.addProperty("family_status", spinnerfamilystatus[binding.spinnerFamilystatus.selectedItemPosition])
-        requestBody.addProperty("house_status", houseStatusOptions[binding.spinnerHouseStatus.selectedItemPosition])
+        requestBody.addProperty(
+            "monthly_family_expenditure", binding.familymonthlyExpenditure.text.toString()
+        )
+        requestBody.addProperty(
+            "family_status", spinnerfamilystatus[binding.spinnerFamilystatus.selectedItemPosition]
+        )
+        requestBody.addProperty(
+            "house_status", houseStatusOptions[binding.spinnerHouseStatus.selectedItemPosition]
+        )
         requestBody.addProperty("house_size", binding.editTextHouseSize.text.toString())
-        requestBody.addProperty("residence_at_address_since", binding.editTextResidenceSince.text.toString())
+        requestBody.addProperty(
+            "residence_at_address_since", binding.editTextResidenceSince.text.toString()
+        )
         requestBody.addProperty("value_of_house", binding.houseValueRentEditText.text.toString())
         requestBody.addProperty("rent_of_house", binding.houseValueRentEditText.text.toString())
-        requestBody.addProperty("office_setup_seen", if (binding.radioButtonOfficeSetup.isSelected) "Good" else "Average")
+        requestBody.addProperty(
+            "office_setup_seen",
+            if (binding.radioButtonOfficeSetup.isSelected) "Good" else "Average"
+        )
         requestBody.addProperty("pan_number", binding.panNumberEditText.text.toString())
-        requestBody.addProperty("security_offered_against_loan", binding.securityOfferedEditText.text.toString())
-        requestBody.addProperty("address_of_security", binding.addressOfSecurityEditText.text.toString())
+        requestBody.addProperty(
+            "security_offered_against_loan", binding.securityOfferedEditText.text.toString()
+        )
+        requestBody.addProperty(
+            "address_of_security", binding.addressOfSecurityEditText.text.toString()
+        )
         requestBody.addProperty("security_value", binding.valueOfSecurityEditText.text.toString())
         requestBody.addProperty("size_of_security", binding.sizeOfSecurityEditText.text.toString())
-        requestBody.addProperty("neighbour_check_status", if (binding.EnterNeighborCheckStatusone.isSelected) "Positive" else "Negative")
+        requestBody.addProperty(
+            "neighbour_check_status",
+            if (binding.EnterNeighborCheckStatusone.isSelected) "Positive" else "Negative"
+        )
         requestBody.addProperty("assets_owned", binding.Assets.text.toString())
         requestBody.addProperty("earning_family_members", familyIncomeDataArray.toString())
         requestBody.addProperty("current_loans", loanDataArray.toString())
@@ -1334,7 +1243,8 @@ class SalaryForm : AppCompatActivity() {
 
         Log.e("@@TAG", "Form Data: $requestBody")
 
-        val sharedPreferences = context.getSharedPreferences("FormDataStorage", Context.MODE_PRIVATE)
+        val sharedPreferences =
+            context.getSharedPreferences("FormDataStorage", Context.MODE_PRIVATE)
         sharedPreferences.edit().putString(case_id, requestBody.toString()).apply()
 
         if (status) {
@@ -1342,15 +1252,12 @@ class SalaryForm : AppCompatActivity() {
                 ContextThemeWrapper(context, R.style.ThemeOverlay_MaterialComponents_Dialog),
                 SweetAlertDialog.SUCCESS_TYPE
             )
-            successDialog.setTitleText("Success!")
-                .setContentText("Details Saved")
-                .setConfirmText("OK")
-                .setConfirmClickListener {
+            successDialog.setTitleText("Success!").setContentText("Details Saved")
+                .setConfirmText("OK").setConfirmClickListener {
                     it.dismissWithAnimation()
                     (context as Activity).startActivity(Intent(context, MainActivity::class.java))
                     (context as Activity).finish()
-                }
-                .show()
+                }.show()
 
             val confirmButton = successDialog.findViewById<TextView>(R.id.confirm_button)
             confirmButton?.setBackgroundColor(Color.parseColor("#FF6200EE"))
@@ -1359,128 +1266,128 @@ class SalaryForm : AppCompatActivity() {
         }
     }
 
-/*
-    fun loadFormDataFromSharedPrefs(caseId: String) {
-        val prefs = getSharedPreferences("FormData", Context.MODE_PRIVATE)
-        fun key(name: String) = "${caseId}_$name"
+    /*
+        fun loadFormDataFromSharedPrefs(caseId: String) {
+            val prefs = getSharedPreferences("FormData", Context.MODE_PRIVATE)
+            fun key(name: String) = "${caseId}_$name"
 
-        binding.loanAmountEditText.setText(prefs.getString(key("loan_amt"), ""))
-        binding.visitedAddress.setText(prefs.getString(key("visit_address"), ""))
-        binding.txtVisitedDate.setText(prefs.getString(key("date_of_visit"), ""))
-        binding.visitedTime.setText(prefs.getString(key("time"), ""))
-        binding.persontmeetnameEditText.setText(prefs.getString(key("person_meet"), ""))
-        binding.loanPurposeEditText.setText(prefs.getString(key("loan_purpose"), ""))
-        binding.orgnization.setText(prefs.getString(key("name_of_organization"), ""))
-        binding.workexprience.setText(prefs.getString(key("work_experience"), ""))
-        binding.education.setText(prefs.getString(key("education"), ""))
-        binding.numberoffamilynumber.setText(prefs.getString(key("number_of_family_members"), ""))
-        binding.sizeOfSecurityEditText.setText(prefs.getString(key("sizeOfSecurityEditText"), ""))
+            binding.loanAmountEditText.setText(prefs.getString(key("loan_amt"), ""))
+            binding.visitedAddress.setText(prefs.getString(key("visit_address"), ""))
+            binding.txtVisitedDate.setText(prefs.getString(key("date_of_visit"), ""))
+            binding.visitedTime.setText(prefs.getString(key("time"), ""))
+            binding.persontmeetnameEditText.setText(prefs.getString(key("person_meet"), ""))
+            binding.loanPurposeEditText.setText(prefs.getString(key("loan_purpose"), ""))
+            binding.orgnization.setText(prefs.getString(key("name_of_organization"), ""))
+            binding.workexprience.setText(prefs.getString(key("work_experience"), ""))
+            binding.education.setText(prefs.getString(key("education"), ""))
+            binding.numberoffamilynumber.setText(prefs.getString(key("number_of_family_members"), ""))
+            binding.sizeOfSecurityEditText.setText(prefs.getString(key("sizeOfSecurityEditText"), ""))
 
-        addLat = prefs.getString(key("lat"), "") ?: ""
-        addLong = prefs.getString(key("long"), "") ?: ""
-        addAddress = prefs.getString(key("location"), "") ?: ""
+            addLat = prefs.getString(key("lat"), "") ?: ""
+            addLong = prefs.getString(key("long"), "") ?: ""
+            addAddress = prefs.getString(key("location"), "") ?: ""
 
-        binding.familymonthlyExpenditure.setText(
-            prefs.getString(
-                key("monthly_family_expenditure"),
-                ""
-            )
-        )
-        binding.spinnerFamilystatus.setSelection(
-            spinnerfamilystatus.indexOf(
+            binding.familymonthlyExpenditure.setText(
                 prefs.getString(
-                    key("family_status"),
+                    key("monthly_family_expenditure"),
                     ""
                 )
             )
-        )
-        binding.spinnerHouseStatus.setSelection(
-            houseStatusOptions.indexOf(
+            binding.spinnerFamilystatus.setSelection(
+                spinnerfamilystatus.indexOf(
+                    prefs.getString(
+                        key("family_status"),
+                        ""
+                    )
+                )
+            )
+            binding.spinnerHouseStatus.setSelection(
+                houseStatusOptions.indexOf(
+                    prefs.getString(
+                        key("house_status"),
+                        ""
+                    )
+                )
+            )
+            binding.editTextHouseSize.setText(prefs.getString(key("house_size"), ""))
+            binding.editTextResidenceSince.setText(
                 prefs.getString(
-                    key("house_status"),
+                    key("residence_at_address_since"),
                     ""
                 )
             )
-        )
-        binding.editTextHouseSize.setText(prefs.getString(key("house_size"), ""))
-        binding.editTextResidenceSince.setText(
-            prefs.getString(
-                key("residence_at_address_since"),
-                ""
+            binding.houseValueRentEditText.setText(prefs.getString(key("value_of_house"), ""))
+            binding.grossSalaryEditText.setText(prefs.getString(key("gross_salary"), ""))
+            binding.netSalaryEditText.setText(prefs.getString(key("net_salary"), ""))
+            binding.currentPositionEditText.setText(
+                prefs.getString(
+                    key("current_position_of_employee"),
+                    ""
+                )
             )
-        )
-        binding.houseValueRentEditText.setText(prefs.getString(key("value_of_house"), ""))
-        binding.grossSalaryEditText.setText(prefs.getString(key("gross_salary"), ""))
-        binding.netSalaryEditText.setText(prefs.getString(key("net_salary"), ""))
-        binding.currentPositionEditText.setText(
-            prefs.getString(
-                key("current_position_of_employee"),
-                ""
+            binding.txtDateofjoin.setText(prefs.getString(key("date_of_joining"), ""))
+            binding.otherIncomeEditText.setText(prefs.getString(key("other_income_of_applicant"), ""))
+            binding.previousEmploymentEditText.setText(
+                prefs.getString(
+                    key("previous_employement_details"),
+                    ""
+                )
             )
-        )
-        binding.txtDateofjoin.setText(prefs.getString(key("date_of_joining"), ""))
-        binding.otherIncomeEditText.setText(prefs.getString(key("other_income_of_applicant"), ""))
-        binding.previousEmploymentEditText.setText(
-            prefs.getString(
-                key("previous_employement_details"),
-                ""
-            )
-        )
-        binding.officeTimingsEditText.setText(prefs.getString(key("office_timings"), ""))
-        binding.holidayEditText.setText(prefs.getString(key("holiday"), ""))
-        binding.panNumberEditText.setText(prefs.getString(key("pan_number"), ""))
+            binding.officeTimingsEditText.setText(prefs.getString(key("office_timings"), ""))
+            binding.holidayEditText.setText(prefs.getString(key("holiday"), ""))
+            binding.panNumberEditText.setText(prefs.getString(key("pan_number"), ""))
 
-        binding.radioButton1One.isSelected = prefs.getString(key("name_board_seen"), "") == "Yes"
-        binding.employerNameEditText.setText(prefs.getString(key("employer_name"), ""))
-        binding.employerNumberEditText.setText(prefs.getString(key("employer_mobile_no"), ""))
-        binding.coEmployeeNameEditText.setText(prefs.getString(key("co_employee_name"), ""))
-        binding.coEmployeeNumber.setText(prefs.getString(key("co_employee_mobile_no"), ""))
-        binding.securityOfferedEditText.setText(
-            prefs.getString(
-                key("security_offered_against_loan"),
-                ""
+            binding.radioButton1One.isSelected = prefs.getString(key("name_board_seen"), "") == "Yes"
+            binding.employerNameEditText.setText(prefs.getString(key("employer_name"), ""))
+            binding.employerNumberEditText.setText(prefs.getString(key("employer_mobile_no"), ""))
+            binding.coEmployeeNameEditText.setText(prefs.getString(key("co_employee_name"), ""))
+            binding.coEmployeeNumber.setText(prefs.getString(key("co_employee_mobile_no"), ""))
+            binding.securityOfferedEditText.setText(
+                prefs.getString(
+                    key("security_offered_against_loan"),
+                    ""
+                )
             )
-        )
-        binding.addressOfSecurityEditText.setText(prefs.getString(key("address_of_security"), ""))
-        binding.valueOfSecurityEditText.setText(prefs.getString(key("security_value"), ""))
-        binding.editTextHouseSize.setText(prefs.getString(key("size_of_security"), ""))
+            binding.addressOfSecurityEditText.setText(prefs.getString(key("address_of_security"), ""))
+            binding.valueOfSecurityEditText.setText(prefs.getString(key("security_value"), ""))
+            binding.editTextHouseSize.setText(prefs.getString(key("size_of_security"), ""))
 
-        binding.EnterNeighborCheckStatusone.isSelected =
-            prefs.getString(key("neighbour_check_status"), "") == "Positive"
-        binding.radioButtonOfficeSetup.isSelected =
-            prefs.getString(key("business_setup"), "") == "Good"
-        binding.SalaryReceivedInone.isSelected =
-            prefs.getString(key("salary_received"), "") == "Bank"
-        binding.Assets.setText(prefs.getString(key("assets_owned"), ""))
+            binding.EnterNeighborCheckStatusone.isSelected =
+                prefs.getString(key("neighbour_check_status"), "") == "Positive"
+            binding.radioButtonOfficeSetup.isSelected =
+                prefs.getString(key("business_setup"), "") == "Good"
+            binding.SalaryReceivedInone.isSelected =
+                prefs.getString(key("salary_received"), "") == "Bank"
+            binding.Assets.setText(prefs.getString(key("assets_owned"), ""))
 
-        prefs.getString(key("earning_family_members"), "[]")?.let {
-            familyIncomeDataArray = JsonArray()
-            familyIncomeDataArray.apply {
-//                clear()
-//                addAll(JsonParser.parseString(it).asJsonArray)
+            prefs.getString(key("earning_family_members"), "[]")?.let {
+                familyIncomeDataArray = JsonArray()
+                familyIncomeDataArray.apply {
+    //                clear()
+    //                addAll(JsonParser.parseString(it).asJsonArray)
+                }
             }
+    //
+    //        prefs.getString(key("bank_details"), "[]")?.let {
+    //            bankdetailsDataArray.apply {
+    //                clear()
+    //                addAll(JsonParser.parseString(it).asJsonArray)
+    //            }
+    //        }
+    //
+    //        prefs.getString(key("current_loans"), "[]")?.let {
+    //            loanDataArray.apply {
+    //                clear()
+    //                addAll(JsonParser.parseString(it).asJsonArray)
+    //            }
+    //        }
+    //
+    //        prefs.getString(key("image    _name"), "[]")?.let {
+    //            srtarr = JsonParser.parseString(it).asJsonArray
+    //        }
+            setFamilyIncomeFieldsFromJsonArray()
         }
-//
-//        prefs.getString(key("bank_details"), "[]")?.let {
-//            bankdetailsDataArray.apply {
-//                clear()
-//                addAll(JsonParser.parseString(it).asJsonArray)
-//            }
-//        }
-//
-//        prefs.getString(key("current_loans"), "[]")?.let {
-//            loanDataArray.apply {
-//                clear()
-//                addAll(JsonParser.parseString(it).asJsonArray)
-//            }
-//        }
-//
-//        prefs.getString(key("image    _name"), "[]")?.let {
-//            srtarr = JsonParser.parseString(it).asJsonArray
-//        }
-        setFamilyIncomeFieldsFromJsonArray()
-    }
-*/
+    */
 
     fun loadFormData(case_id: String) {
         try {
@@ -1499,29 +1406,47 @@ class SalaryForm : AppCompatActivity() {
             binding.workexprience.setText(jsonObject.get("work_experience")?.asString ?: "")
             binding.education.setText(jsonObject.get("education")?.asString ?: "")
             binding.remarkText.setText(jsonObject.get("remark")?.asString ?: "")
-            binding.numberoffamilynumber.setText(jsonObject.get("number_of_family_members")?.asString ?: "")
+            binding.numberoffamilynumber.setText(
+                jsonObject.get("number_of_family_members")?.asString ?: ""
+            )
 
             binding.grossSalaryEditText.setText(jsonObject.get("gross_salary")?.asString ?: "")
             binding.netSalaryEditText.setText(jsonObject.get("net_salary")?.asString ?: "")
-            binding.currentPositionEditText.setText(jsonObject.get("current_position_of_employee")?.asString ?: "")
+            binding.currentPositionEditText.setText(
+                jsonObject.get("current_position_of_employee")?.asString ?: ""
+            )
             binding.txtDateofjoin.setText(jsonObject.get("date_of_joining")?.asString ?: "")
-            binding.otherIncomeEditText.setText(jsonObject.get("other_income_of_applicant")?.asString ?: "")
-            binding.previousEmploymentEditText.setText(jsonObject.get("previous_employement_details")?.asString ?: "")
+            binding.otherIncomeEditText.setText(
+                jsonObject.get("other_income_of_applicant")?.asString ?: ""
+            )
+            binding.previousEmploymentEditText.setText(
+                jsonObject.get("previous_employement_details")?.asString ?: ""
+            )
             binding.officeTimingsEditText.setText(jsonObject.get("office_timings")?.asString ?: "")
             binding.employerNameEditText.setText(jsonObject.get("employer_name")?.asString ?: "")
-            binding.employerNumberEditText.setText(jsonObject.get("employer_mobile_no")?.asString ?: "")
-            binding.coEmployeeNameEditText.setText(jsonObject.get("co_employee_name")?.asString ?: "")
-            binding.coEmployeeNumber.setText(jsonObject.get("co_employee_mobile_no")?.asString ?: "")
+            binding.employerNumberEditText.setText(
+                jsonObject.get("employer_mobile_no")?.asString ?: ""
+            )
+            binding.coEmployeeNameEditText.setText(
+                jsonObject.get("co_employee_name")?.asString ?: ""
+            )
+            binding.coEmployeeNumber.setText(
+                jsonObject.get("co_employee_mobile_no")?.asString ?: ""
+            )
 
             // Handle Salary Received safely
             val salaryReceived = jsonObject.get("salary_received")?.asString ?: ""
             binding.SalaryReceivedInone.isSelected = salaryReceived == "Bank"
             binding.SalaryReceivedIntwo.isSelected = salaryReceived == "Cash"
 
-            binding.familymonthlyExpenditure.setText(jsonObject.get("monthly_family_expenditure")?.asString ?: "")
+            binding.familymonthlyExpenditure.setText(
+                jsonObject.get("monthly_family_expenditure")?.asString ?: ""
+            )
 
             binding.editTextHouseSize.setText(jsonObject.get("house_size")?.asString ?: "")
-            binding.editTextResidenceSince.setText(jsonObject.get("residence_at_address_since")?.asString ?: "")
+            binding.editTextResidenceSince.setText(
+                jsonObject.get("residence_at_address_since")?.asString ?: ""
+            )
             binding.houseValueRentEditText.setText(jsonObject.get("value_of_house")?.asString ?: "")
 
             // Office setup selection
@@ -1530,10 +1455,18 @@ class SalaryForm : AppCompatActivity() {
             binding.radioButtonOfficeSetup.isSelected = officeSetup == "Average"
 
             binding.panNumberEditText.setText(jsonObject.get("pan_number")?.asString ?: "")
-            binding.securityOfferedEditText.setText(jsonObject.get("security_offered_against_loan")?.asString ?: "")
-            binding.addressOfSecurityEditText.setText(jsonObject.get("address_of_security")?.asString ?: "")
-            binding.valueOfSecurityEditText.setText(jsonObject.get("security_value")?.asString ?: "")
-            binding.sizeOfSecurityEditText.setText(jsonObject.get("size_of_security")?.asString ?: "")
+            binding.securityOfferedEditText.setText(
+                jsonObject.get("security_offered_against_loan")?.asString ?: ""
+            )
+            binding.addressOfSecurityEditText.setText(
+                jsonObject.get("address_of_security")?.asString ?: ""
+            )
+            binding.valueOfSecurityEditText.setText(
+                jsonObject.get("security_value")?.asString ?: ""
+            )
+            binding.sizeOfSecurityEditText.setText(
+                jsonObject.get("size_of_security")?.asString ?: ""
+            )
             binding.holidayEditText.setText(jsonObject.get("holiday")?.asString ?: "")
             binding.Assets.setText(jsonObject.get("assets_owned")?.asString ?: "")
 
@@ -1541,7 +1474,8 @@ class SalaryForm : AppCompatActivity() {
             try {
                 val earningFamilyMembersString = jsonObject.get("earning_family_members")?.asString
                 if (!earningFamilyMembersString.isNullOrEmpty()) {
-                    familyIncomeDataArray = JsonParser.parseString(earningFamilyMembersString).asJsonArray
+                    familyIncomeDataArray =
+                        JsonParser.parseString(earningFamilyMembersString).asJsonArray
                 }
             } catch (e: Exception) {
                 Log.e("LoadData", "Error parsing earning_family_members: ${e.message}")
@@ -1605,9 +1539,9 @@ class SalaryForm : AppCompatActivity() {
         }
     }
 
-    private fun addFamilyIncomeField(name: String,
-                                     income: String,
-                                     relation: String) {
+    private fun addFamilyIncomeField(
+        name: String, income: String, relation: String
+    ) {
         familyincome++
 
         val loanCard = CardView(this)
@@ -1633,19 +1567,19 @@ class SalaryForm : AppCompatActivity() {
 
         val bankNameEditText = EditText(this)
         bankNameEditText.hint = "Name $familyincome"
-        bankNameEditText.inputType= InputType.TYPE_CLASS_TEXT
+        bankNameEditText.inputType = InputType.TYPE_CLASS_TEXT
         bankNameEditText.setText(name)
         loanLayout.addView(bankNameEditText)
 
         val amountEditText = EditText(this)
         amountEditText.hint = "Income $familyincome"
-        amountEditText.inputType= InputType.TYPE_CLASS_TEXT
+        amountEditText.inputType = InputType.TYPE_CLASS_TEXT
         amountEditText.setText(income)
         loanLayout.addView(amountEditText)
 
         val relationEditText = EditText(this)
         relationEditText.hint = "Relation $familyincome"
-        relationEditText.inputType= InputType.TYPE_CLASS_TEXT
+        relationEditText.inputType = InputType.TYPE_CLASS_TEXT
         relationEditText.setText(relation)
         loanLayout.addView(relationEditText)
 
@@ -1666,6 +1600,7 @@ class SalaryForm : AppCompatActivity() {
 
         bankNameEditText.addTextChangedListener(textWatcher)
         amountEditText.addTextChangedListener(textWatcher)
+        relationEditText.addTextChangedListener(textWatcher)
 
         val removeButton = Button(this)
         removeButton.text = "❌ Remove"
@@ -1675,7 +1610,7 @@ class SalaryForm : AppCompatActivity() {
             familyincome--;
             familyIncomeDataArray.remove(jsonObject) // Remove from JSON array
 
-            Log.e("@@TAG", "addFamilyIncomeField: "+familyIncomeDataArray.size() )
+            Log.e("@@TAG", "addFamilyIncomeField: " + familyIncomeDataArray.size())
         }
         loanLayout.addView(removeButton)
 
@@ -1709,25 +1644,25 @@ class SalaryForm : AppCompatActivity() {
 
         val bankNameEditText = EditText(this)
         bankNameEditText.hint = "Name of Bank $loans"
-        bankNameEditText.inputType= InputType.TYPE_CLASS_TEXT
+        bankNameEditText.inputType = InputType.TYPE_CLASS_TEXT
         bankNameEditText.setText(name)
         loanLayout.addView(bankNameEditText)
 
         val amountEditText = EditText(this)
         amountEditText.hint = "EMI Balance $loans"
-        amountEditText.inputType= InputType.TYPE_CLASS_TEXT
+        amountEditText.inputType = InputType.TYPE_CLASS_TEXT
         amountEditText.setText(emi)
         loanLayout.addView(amountEditText)
 
         val typeOfLoanEditText = EditText(this)
         typeOfLoanEditText.hint = "Type of Loan $loans"
-        typeOfLoanEditText.inputType= InputType.TYPE_CLASS_TEXT
+        typeOfLoanEditText.inputType = InputType.TYPE_CLASS_TEXT
         typeOfLoanEditText.setText(type)
         loanLayout.addView(typeOfLoanEditText)
 
         val tenureOfLoanEditText = EditText(this)
         tenureOfLoanEditText.hint = "Tenure of Loan $loans"
-        tenureOfLoanEditText.inputType= InputType.TYPE_CLASS_TEXT
+        tenureOfLoanEditText.inputType = InputType.TYPE_CLASS_TEXT
         tenureOfLoanEditText.setText(tenure)
         loanLayout.addView(tenureOfLoanEditText)
 
@@ -1791,25 +1726,25 @@ class SalaryForm : AppCompatActivity() {
 
         val bankNameEditText = EditText(this)
         bankNameEditText.hint = "Bank Name $bankdetails"
-        bankNameEditText.inputType= InputType.TYPE_CLASS_TEXT
+        bankNameEditText.inputType = InputType.TYPE_CLASS_TEXT
         bankNameEditText.setText(name)
         bankLayout.addView(bankNameEditText)
 
         val branchNameEditText = EditText(this)
         branchNameEditText.hint = "Branch Name $bankdetails"
-        branchNameEditText.inputType= InputType.TYPE_CLASS_TEXT
+        branchNameEditText.inputType = InputType.TYPE_CLASS_TEXT
         branchNameEditText.setText(branch)
         bankLayout.addView(branchNameEditText)
 
         val accountTypeEditText = EditText(this)
         accountTypeEditText.hint = "Account Type $bankdetails"
-        accountTypeEditText.inputType= InputType.TYPE_CLASS_TEXT
+        accountTypeEditText.inputType = InputType.TYPE_CLASS_TEXT
         accountTypeEditText.setText(type)
         bankLayout.addView(accountTypeEditText)
 
         val accountSinceEditText = EditText(this)
         accountSinceEditText.hint = "Account Since $bankdetails"
-        accountSinceEditText.inputType= InputType.TYPE_CLASS_TEXT
+        accountSinceEditText.inputType = InputType.TYPE_CLASS_TEXT
         accountSinceEditText.setText(since)
         bankLayout.addView(accountSinceEditText)
 
@@ -1846,6 +1781,7 @@ class SalaryForm : AppCompatActivity() {
         bankCard.addView(bankLayout)
         binding.layoutloans2.addView(bankCard)
     }
+
     private fun setFamilyIncomeFieldsFromJsonArray() {
         familyincome = 0
         loans = 0
@@ -1860,10 +1796,7 @@ class SalaryForm : AppCompatActivity() {
             val TenureofLoan = data.get("AccountSince")?.asString ?: ""
 
             if (name.isNotBlank() && branch.isNotBlank() && type.isNotBlank() && TenureofLoan.isNotBlank()) addBackField(
-                name,
-                branch,
-                type,
-                TenureofLoan
+                name, branch, type, TenureofLoan
             )
         }
 
@@ -1876,10 +1809,7 @@ class SalaryForm : AppCompatActivity() {
             val TenureofLoan = data.get("TenureofLoan")?.asString ?: ""
 
             if (name.isNotBlank() && TypeofLoan.isNotBlank() && EMIBalance.isNotBlank() && TenureofLoan.isNotBlank()) addLoanField(
-                name,
-                EMIBalance,
-                TypeofLoan,
-                TenureofLoan
+                name, EMIBalance, TypeofLoan, TenureofLoan
             )
         }
         for (i in 0 until familyIncomeDataArray.size()) {
@@ -1890,11 +1820,301 @@ class SalaryForm : AppCompatActivity() {
             val relation = data.get("relation")?.asString ?: ""
 
             if (name.isNotBlank() && income.isNotBlank() && relation.isNotBlank()) addFamilyIncomeField(
-                name,
-                income,
-                relation
+                name, income, relation
             )
         }
     }
+
+    private lateinit var previewView: PreviewView  // Displays the camera preview
+    private lateinit var captureButton: ImageView  // Button to capture image
+
+    // CameraX Image Capture Use Case
+    private var imageCapture: ImageCapture? = null
+
+
+    private lateinit var displayManager: DisplayManager
+    private var displayId: Int = -1
+
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+
+        override fun onDisplayChanged(id: Int) {
+            if (id == displayId) {
+                imageCapture?.targetRotation = previewView.display.rotation
+            }
+        }
+    }
+
+    private fun startCamera() {
+        binding.laoutCameraVisible.visibility = View.VISIBLE
+        binding.laoutCameraHide.visibility = View.GONE
+
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+        cameraProviderFuture.addListener({
+            try {
+
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+                // CameraX Preview Use Case
+                val preview = Preview.Builder().build()
+                    .also { it.setSurfaceProvider(previewView.surfaceProvider) }
+
+                displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+                displayId = previewView.display.displayId
+
+                imageCapture = ImageCapture.Builder()
+                    .setTargetRotation(previewView.display.rotation)  // <--- Important
+                    .build()
+
+
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA  // Select back camera
+
+                try {
+                    // Unbind previous use cases and bind new ones
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Failed to start camera", Toast.LENGTH_SHORT).show()
+                    binding.laoutCameraVisible.visibility = View.GONE
+                    binding.laoutCameraHide.visibility = View.VISIBLE
+                }
+            } catch (e: Exception) {
+
+            }
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    // Captures an image and saves it to the gallery
+    private fun captureImage() {
+        val imageCapture = imageCapture ?: return
+
+        // Create a unique filename using timestamp
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "IMG_$timestamp.jpg")
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/CameraX-Images"
+                )  // Save to gallery
+            }
+        }
+
+        // Configure output file options
+
+        val rotation = windowManager.defaultDisplay.rotation
+        imageCapture.targetRotation = rotation
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+        ).build()
+
+        // Capture and save the image
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+//                    binding.laoutCameraVisible.visibility = View.GONE
+//                    binding.laoutCameraHide.visibility = View.VISIBLE
+//
+                    imageUri = outputFileResults.savedUri
+//                    Toast.makeText(this@SalaryForm, "Image captured: $imageUri", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this@SalaryForm, "Image captured "+  (selectedImages.size+1), Toast.LENGTH_SHORT).show()
+                    if (imageUri != null) {
+
+                        selectedImages.add(imageUri!!)
+                        imageAdapter.notifyDataSetChanged()
+                        imageAdapter1.notifyDataSetChanged()
+                        binding.image.setText("Selected Images: " + (selectedImages.size))
+                    }
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Toast.makeText(this@SalaryForm, "Failed to save image", Toast.LENGTH_SHORT)
+                        .show()
+                    binding.laoutCameraVisible.visibility = View.GONE
+                    binding.laoutCameraHide.visibility = View.VISIBLE
+                }
+            })
+    }
+
+    override fun onBackPressed() {
+        if (binding.laoutCameraVisible.isVisible) {
+            binding.laoutCameraVisible.visibility = View.GONE
+            binding.laoutCameraHide.visibility = View.VISIBLE
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    fun openCamera() {
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            checkPermissionsCamera()
+        }
+    }
+
+    fun allPermissionsGranted(): Boolean {
+        // Iterate through the permissions in REQUIRED_PERMISSIONS
+        for (permission in REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(
+                    this, permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false // Return false if any permission is not granted
+            }
+        }
+        return true // Return true if all permissions are granted
+    }
+
+    private val REQUIRED_PERMISSIONS = mutableListOf(
+        Manifest.permission.CAMERA
+    ).apply {
+        // For Android 9 (Pie) or lower
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        // For Android 10 (Q) to Android 12 (S)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_EXTERNAL_STORAGE) // Read external storage (for backward compatibility)
+        }
+
+        // For Android 13 (Tiramisu) and higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.READ_MEDIA_IMAGES)
+        }
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }.toTypedArray()
+
+    private fun checkPermissionsCamera() {
+        val permissionsNeeded = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            // Show the permission explanation dialog
+            showPermissionExplanationDialog(permissionsNeeded)
+        } else {
+            openCamera()
+        }
+    }
+
+    private fun showPermissionExplanationDialog(permissionsNeeded: List<String>) {
+        AlertDialog.Builder(this).setTitle("Permissions Needed")
+            .setMessage("We need these permissions to ensure full functionality. Please grant the required permissions.")
+            .setPositiveButton("Grant") { _, _ ->
+                // Request the permissions if user agrees
+                ActivityCompat.requestPermissions(
+                    this, permissionsNeeded.toTypedArray(), REQUEST_CODE
+                )
+            }.setNegativeButton("Deny") { dialog, _ ->
+                dialog.dismiss()
+            }.show()
+    }
+
+    // Handle the result of the permission request
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE) {
+            val deniedPermissions = mutableListOf<String>()
+            val permanentlyDeniedPermissions = mutableListOf<String>()
+
+            for ((index, permission) in permissions.withIndex()) {
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                    deniedPermissions.add(permission)
+
+                    // Check if the user denied the permission permanently
+//                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+//                        permanentlyDeniedPermissions.add(permission)
+//                    }
+                }
+            }
+
+            if (deniedPermissions.isNotEmpty()) {
+                // Show the dialog again or take other actions
+
+                permissionCount++
+                if (permissionCount == 5) {
+                    permissionCount=0;
+                    showGoToSettingsDialog()
+                } else {
+                    showPermissionExplanationDialog {
+                        // User agrees, request permissions again
+                        ActivityCompat.requestPermissions(this, deniedPermissions.toTypedArray(),
+                            REQUEST_CODE
+                        )
+                    }
+                }
+            }
+
+
+//            if (deniedPermissions.isNotEmpty()) {
+//                // Show the dialog if permissions were denied
+//                if (permanentlyDeniedPermissions.isNotEmpty()) {
+//                    // Show a dialog that directs the user to settings if they selected "Don't ask again"
+//                    showGoToSettingsDialog()
+//                } else {
+//                    // If permissions were just denied but not permanently, show explanation dialog again
+//                    showPermissionExplanationDialog(deniedPermissions)
+//                }
+//            }
+        }
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getLastLocation()
+            } else {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                        this, Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                ) {
+                    // "Don't ask again" selected
+                    showSettingsDialog()
+                } else {
+                    Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+    }
+    private fun showPermissionExplanationDialog(onPositiveClick: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle("Permissions Needed")
+            .setMessage("We need these permissions to provide full functionality. Please allow them.")
+            .setPositiveButton("Allow") { _, _ -> onPositiveClick() }
+            .setNegativeButton("Deny") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
+    }
+    var permissionCount=0;
+    // Show dialog directing the user to settings if they permanently denied the permissions
+    private fun showGoToSettingsDialog() {
+        AlertDialog.Builder(this).setTitle("Permissions Denied Permanently")
+            .setMessage("You have permanently denied the required permissions. Please go to settings and enable them manually.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                // Direct user to the app settings
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri: Uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }.show()
+    }
+
+    companion object {
+        private const val REQUEST_CODE = 100
+        private const val PERMISSION_ID: Int = 44
+    }
+
 
 }

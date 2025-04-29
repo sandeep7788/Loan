@@ -12,7 +12,6 @@ import cn.pedant.SweetAlert.SweetAlertDialog
 import com.cbi_solar.cbisolar.databinding.ActivitySignInBinding
 import com.cbi_solar.helper.ApiContants
 import com.cbi_solar.helper.ApiInterface
-import com.cbi_solar.helper.ApiRequest
 import com.cbi_solar.helper.MyApplication
 import com.cbi_solar.helper.RetrofitManager
 import com.google.gson.JsonObject
@@ -48,8 +47,10 @@ class SignInActivity : AppCompatActivity() {
                     } catch (e:Exception) {
                     }
                     progressDialog!!.show()
-                    ApiRequest.verifierLogin(this@SignInActivity, binding.txtNumber.text.toString().trim(),
-                        binding.txtPassword.text.toString().trim(),deviceID , progressDialog)
+
+                    signIn()
+//                    ApiRequest.verifierLogin(this@SignInActivity, binding.txtNumber.text.toString().trim(),
+//                        binding.txtPassword.text.toString().trim(),deviceID , progressDialog)
                 }
             }
         }
@@ -63,11 +64,12 @@ class SignInActivity : AppCompatActivity() {
     fun signIn() {
         progressDialog!!.show()
         val apiInterface: ApiInterface =
-            RetrofitManager().instance!!.create(ApiInterface::class.java)
+            RetrofitManager().instance1!!.create(ApiInterface::class.java)
 
         apiInterface.signIn(
             binding.txtNumber.text.toString().trim(),
-            binding.txtPassword.text.toString().trim()
+            binding.txtPassword.text.toString().trim(),
+            deviceID
         ).enqueue(object :
             Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
@@ -90,9 +92,9 @@ class SignInActivity : AppCompatActivity() {
                         Log.d(TAG, "onResponse: $jsonObject")
 
                         Toast.makeText(this@SignInActivity, " ${jsonObject.get("msg").asString}", Toast.LENGTH_LONG).show()
-
+                        var responseBody: JsonObject? =null
+                        responseBody = jsonObject.getAsJsonObject("responseBody")
                         if (jsonObject.get("status").asBoolean) {
-                            val responseBody = jsonObject.getAsJsonObject("responseBody")
 
                             MyApplication.writeStringPreference(ApiContants.id, responseBody.get("id").asString)
                             MyApplication.writeStringPreference(ApiContants.PREF_F_name, responseBody.get("verifier_name").asString)
@@ -101,11 +103,13 @@ class SignInActivity : AppCompatActivity() {
                             startActivity(Intent(this@SignInActivity, SplashScreen::class.java))
                             finish()
                         } else {
-                            Utility.showDialog(
-                                this@SignInActivity,
-                                SweetAlertDialog.WARNING_TYPE,
-                                resources.getString(R.string.error)
-                            )
+                            responseBody?.get("msg")?.asString?.let {
+                                Utility.showDialog(
+                                    this@SignInActivity,
+                                    SweetAlertDialog.WARNING_TYPE,
+                                    it
+                                )
+                            }
 
                             Toast.makeText(this@SignInActivity, "Bad Response!", Toast.LENGTH_LONG).show()
                         }
