@@ -70,4 +70,5 @@ object ApiContants {
         const val PREF_F_name = "PREF_F_name"
         const val PREF_L_name = "PREF_L_name"
         const val WhatsAppNumber = "PREF_L_name"
+        const val verifier_name = "verifier_name"
 }

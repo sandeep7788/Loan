@@ -157,7 +157,11 @@ class MainActivity : AppCompatActivity() {
         val apiInterface: ApiInterface =
             RetrofitManager().instance!!.create(ApiInterface::class.java)
 
-        apiInterface.product_list("4")?.enqueue(object : Callback<JsonObject> {
+//    verifier_id
+
+    var verifier_id:String = MyApplication.ReadStringPreferences(ApiContants.verifier_name)!!
+
+        apiInterface.product_list(verifier_id.toString().trim())?.enqueue(object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 binding.shimmerSkeleton1.visibility=View.GONE
                 binding.shimmerSkeleton2.visibility=View.GONE

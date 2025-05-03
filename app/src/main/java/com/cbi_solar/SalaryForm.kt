@@ -122,11 +122,10 @@ class SalaryForm : AppCompatActivity() {
                 RequestBody.create(MediaType.parse("multipart/form-data"), file)
             val parts = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
-
             val apiInterface: ApiInterface =
                 RetrofitManager().instance1!!.create(ApiInterface::class.java)
 
-            apiInterface.uploadImage(parts, "describtion")?.enqueue(object : Callback<JsonObject> {
+            apiInterface.uploadImage(parts, case_id.toString())?.enqueue(object : Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                     if (progressDialog!!.isShowing) {
                         progressDialog!!.dismiss()
@@ -382,6 +381,11 @@ class SalaryForm : AppCompatActivity() {
             binding.laoutCameraVisible.visibility = View.GONE
             binding.laoutCameraHide.visibility = View.VISIBLE
         }
+        binding.cameraChange.setOnClickListener {
+            switchCamera()
+        }
+
+
     }
 
     lateinit var progressDialog: SweetAlertDialog
@@ -1846,9 +1850,25 @@ class SalaryForm : AppCompatActivity() {
         }
     }
 
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private lateinit var cameraSelector: CameraSelector
+
+    private fun switchCamera() {
+        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
+        startCamera() // or your method to bind use cases again
+    }
+
     private fun startCamera() {
         binding.laoutCameraVisible.visibility = View.VISIBLE
         binding.laoutCameraHide.visibility = View.GONE
+
+        cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
+            .build()
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -1869,9 +1889,6 @@ class SalaryForm : AppCompatActivity() {
                     .build()
 
 
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA  // Select back camera
-
                 try {
                     // Unbind previous use cases and bind new ones
                     cameraProvider.unbindAll()
@@ -1888,6 +1905,7 @@ class SalaryForm : AppCompatActivity() {
     }
 
     // Captures an image and saves it to the gallery
+
     private fun captureImage() {
         val imageCapture = imageCapture ?: return
 

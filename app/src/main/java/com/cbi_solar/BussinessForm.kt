@@ -128,7 +128,7 @@ class BussinessForm : AppCompatActivity() {
             val apiInterface: ApiInterface =
                 RetrofitManager().instance1!!.create(ApiInterface::class.java)
 
-            apiInterface.uploadImage(parts, "describtion")?.enqueue(object : Callback<JsonObject> {
+            apiInterface.uploadImage(parts, case_id.toString())?.enqueue(object : Callback<JsonObject> {
                 override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                     if (progressDialog.isShowing) {
                         progressDialog.dismiss()
@@ -427,8 +427,6 @@ class BussinessForm : AppCompatActivity() {
         progressDialog.setTitleText("Loading...")
         progressDialog.setCancelable(false)
 
-
-
         bindinge.buttonAddCustomerDetail.setOnClickListener { addCustomerDetail("", "") }
         bindinge.buttonAddSupplier.setOnClickListener { addbuttonAddSupplier("", "", "") }
         bindinge.submitSave.setOnClickListener {
@@ -449,6 +447,10 @@ class BussinessForm : AppCompatActivity() {
         bindinge.done.setOnClickListener {
             bindinge.laoutCameraVisible.visibility = View.GONE
             bindinge.laoutCameraHide.visibility = View.VISIBLE
+        }
+
+        bindinge.cameraChange.setOnClickListener {
+            switchCamera()
         }
     }
 
@@ -1910,10 +1912,25 @@ class BussinessForm : AppCompatActivity() {
             )
         }
     }
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private lateinit var cameraSelector: CameraSelector
+
+    private fun switchCamera() {
+        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
+        startCamera() // or your method to bind use cases again
+    }
 
     private fun startCamera() {
         bindinge.laoutCameraVisible.visibility = View.VISIBLE
         bindinge.laoutCameraHide.visibility = View.GONE
+
+        cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
+            .build()
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -1932,8 +1949,6 @@ class BussinessForm : AppCompatActivity() {
                 imageCapture = ImageCapture.Builder()
                     .setTargetRotation(previewView.display.rotation)  // <--- Important
                     .build()
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA  // Select back camera
 
                 try {
                     // Unbind previous use cases and bind new ones

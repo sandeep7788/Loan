@@ -82,7 +82,14 @@ class SignInActivity : AppCompatActivity() {
                 Log.e(TAG, "onFailure: " + t.message)
                 progressDialog!!.dismiss()
             }
-
+/*{
+  "status" : true,
+  "msg" : "login successfully",
+  "responseBody" : {
+    "id" : "4",
+    "verifier_name" : "NARESH JI"
+  }
+}*/
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 progressDialog!!.dismiss()
                 try {
@@ -97,7 +104,7 @@ class SignInActivity : AppCompatActivity() {
                         if (jsonObject.get("status").asBoolean) {
 
                             MyApplication.writeStringPreference(ApiContants.id, responseBody.get("id").asString)
-                            MyApplication.writeStringPreference(ApiContants.PREF_F_name, responseBody.get("verifier_name").asString)
+                            MyApplication.writeStringPreference(ApiContants.verifier_name, responseBody.get("id").asString)
                             MyApplication.writeStringPreference(ApiContants.login, "true")
 
                             startActivity(Intent(this@SignInActivity, SplashScreen::class.java))
