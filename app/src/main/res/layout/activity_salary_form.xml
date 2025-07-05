@@ -11,18 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <LinearLayout
             android:id="@+id/laoutCameraVisible"
             android:layout_width="match_parent"
-            android:visibility="gone"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:background="@color/them_dark_color"
+                android:gravity="center"
                 android:orientation="vertical"
                 android:padding="3dp">
 
@@ -34,7 +35,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="6dp"
-                    android:background="#FFFDE8"
+                    android:background="#019eec"
                     android:elevation="12dp"
                     android:orientation="horizontal"
                     android:scrollbarSize="25dp"
@@ -111,7 +112,6 @@
             android:layout_height="match_parent">
 
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -120,18 +120,17 @@
 
                 <LinearLayout
                     android:id="@+id/laoutCameraHide"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:padding="16dp">
-
 
 
                     <TextView
                         android:id="@+id/formTitle"
-                        android:layout_marginTop="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/loan_application_form"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                         android:textStyle="bold"
@@ -165,72 +164,74 @@
 
                     <View
                         android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="2dp"
-                        android:layout_height="1dp"
-                        android:background="@color/them_dark_color"/>
+                        android:background="@color/them_dark_color" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:weightSum="2"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:fontFamily="@font/intel"
                             android:paddingStart="8dp"
-                            android:layout_weight="1"
                             android:text="Salary Received In"
                             android:textColor="@color/black"
                             android:textSize="16sp" />
 
 
                         <RadioGroup
-                            android:layout_weight="1"
                             android:id="@+id/SalaryReceivedIn"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="horizontal">
 
                             <RadioButton
                                 android:id="@+id/SalaryReceivedInone"
                                 android:layout_width="wrap_content"
-                                android:fontFamily="@font/intel"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
+                                android:fontFamily="@font/intel"
                                 android:text="Bank" />
 
                             <RadioButton
-                                android:id="@+id/SalaryReceivedIntwo"
-                                android:layout_marginStart="8dp"
+                                android:id="@+id/SalaryReceivedInTwo"
                                 android:layout_width="wrap_content"
-                                android:fontFamily="@font/intel"
                                 android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:fontFamily="@font/intel"
                                 android:text="Cash" />
                         </RadioGroup>
                     </LinearLayout>
+
                     <View
                         android:layout_width="match_parent"
+                        android:layout_height="1dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="4dp"
-                        android:layout_height="1dp"
-                        android:background="@color/them_dark_color"/>
+                        android:background="@color/them_dark_color" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_dob"
-                        app:layout_constraintTop_toBottomOf="@+id/personalInfoSection"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginTop="12dp"
                         android:background="@drawable/edit_txtbg"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:clickable="true"
                         android:orientation="horizontal"
                         android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
+                        android:paddingBottom="4dp"
+                        app:layout_constraintTop_toBottomOf="@+id/personalInfoSection">
 
                         <ImageView
                             android:layout_width="25dp"
@@ -250,36 +251,36 @@
                             android:id="@+id/visitedTime"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="45dp"
                             android:layout_marginLeft="16dp"
                             android:layout_marginEnd="16dp"
-                            android:layout_marginStart="45dp"
                             android:layout_marginRight="36dp"
                             android:backgroundTint="@color/button_bg"
                             android:clickable="true"
+                            android:drawableRight="@drawable/calender_icon"
                             android:fontFamily="@font/intel"
                             android:hint="Select Visited Time"
                             android:textColor="@color/black"
-                            android:textSize="@dimen/text_nev"
                             android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            android:drawableRight="@drawable/calender_icon"/>
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        app:layout_constraintTop_toBottomOf="@+id/layout_dob"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginTop="12dp"
                         android:background="@drawable/edit_txtbg"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:clickable="true"
                         android:orientation="horizontal"
                         android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
+                        android:paddingBottom="4dp"
+                        app:layout_constraintTop_toBottomOf="@+id/layout_dob">
 
                         <ImageView
                             android:layout_width="25dp"
@@ -305,16 +306,16 @@
                             android:layout_marginRight="36dp"
                             android:backgroundTint="@color/button_bg"
                             android:clickable="true"
+                            android:drawableRight="@drawable/calender_icon"
                             android:fontFamily="@font/intel"
                             android:hint="Visited Date: 00/00/0000"
                             android:textColor="@color/black"
-                            android:textSize="@dimen/text_nev"
                             android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            android:drawableRight="@drawable/calender_icon"/>
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -333,11 +334,30 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/persontmeetnameEditText"
                             android:layout_width="match_parent"
-                            android:lines="4"
                             android:layout_height="wrap_content"
-                            android:inputType="textPersonName" />
+                            android:inputType="textPersonName"
+                            android:lines="4" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="8dp"
+                        android:foregroundGravity="top"
+                        android:gravity="top"
+                        android:hint="Case initiated Address"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/nameLayout">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/caseinitiatedAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:lines="3" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
 
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -346,9 +366,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="8dp"
-                        android:hint="VISIT ADDRESS"
-                        android:gravity="top"
                         android:foregroundGravity="top"
+                        android:gravity="top"
+                        android:hint="VISIT ADDRESS"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/nameLayout">
@@ -358,7 +378,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:inputType="textPostalAddress"
-                            android:lines="3"/>
+                            android:lines="3" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -369,8 +389,7 @@
                         android:hint="Education"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/monthlyIncomeLayout1"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/monthlyIncomeLayout1">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/education"
@@ -384,15 +403,14 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        >
+                        android:layout_marginTop="8dp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/panNumberEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapCharacters"
-                            android:hint="Enter PAN Number" />
+                            android:hint="Enter PAN Number"
+                            android:inputType="textCapCharacters" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Loan Information -->
@@ -417,8 +435,7 @@
                         android:hint="@string/loan_amount"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/loanInfoSection"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/loanInfoSection">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/loanAmountEditText"
@@ -450,9 +467,9 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
                         android:layout_marginTop="8dp"
                         android:hint="@string/loan_term_months"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/loanPurposeLayout">
@@ -483,12 +500,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Organization"
                         android:layout_marginBottom="4dp"
+                        android:hint="Organization"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/financialInfoSection"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/financialInfoSection">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/orgnization"
@@ -503,12 +519,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="Work Experience in Months / Year"
                         android:layout_marginBottom="4dp"
+                        android:hint="Work Experience in Months / Year"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/layoutorganization"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/layoutorganization">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/workexprience"
@@ -529,15 +544,14 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/grossSalaryEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Gross Salary" />
+                                android:hint="Enter Gross Salary"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <!-- Net Salary -->
@@ -548,15 +562,14 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/netSalaryEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Net Salary" />
+                                android:hint="Enter Net Salary"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <!-- Current Position of Employee -->
@@ -568,8 +581,7 @@
                             android:layout_marginTop="8dp"
                             android:hint="Current Position"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/currentPositionEditText"
@@ -583,16 +595,16 @@
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_dob1"
-                        app:layout_constraintTop_toBottomOf="@+id/layout2"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginTop="12dp"
                         android:background="@drawable/edit_txtbg"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:clickable="true"
                         android:orientation="horizontal"
                         android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
+                        android:paddingBottom="4dp"
+                        app:layout_constraintTop_toBottomOf="@+id/layout2">
 
                         <TextView
                             android:id="@+id/txt_dateofjoin"
@@ -604,27 +616,26 @@
                             android:layout_marginRight="36dp"
                             android:backgroundTint="@color/button_bg"
                             android:clickable="true"
+                            android:drawableRight="@drawable/calender_icon"
                             android:fontFamily="@font/intel"
                             android:hint="Date of joining"
                             android:textColor="@color/black"
-                            android:textSize="@dimen/text_nev"
                             android:textColorHint="@color/txt_hint"
+                            android:textSize="@dimen/text_nev"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            android:drawableRight="@drawable/calender_icon"/>
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
                     <LinearLayout
                         android:id="@+id/layout3"
-                        app:layout_constraintTop_toBottomOf="@+id/layout_dob1"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
+                        app:layout_constraintTop_toBottomOf="@+id/layout_dob1"
                         tools:context=".SalaryForm">
 
                         <!-- Other Income of Applicant (If any) -->
@@ -633,15 +644,14 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/otherIncomeEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Other Income" />
+                                android:hint="Enter Other Income"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <!-- Previous Employment Details -->
@@ -650,8 +660,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/previousEmploymentEditText"
@@ -666,8 +675,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/officeTimingsEditText"
@@ -682,8 +690,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/holidayEditText"
@@ -694,8 +701,6 @@
 
 
                     </LinearLayout>
-
-
 
 
                     <TextView
@@ -744,20 +749,20 @@
                         android:id="@+id/button_add_family_income"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Add Detail"
-                        android:drawableLeft="@drawable/add_icon"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
                         android:background="@drawable/round_corner_shape"
                         android:backgroundTint="@color/theme_color"
-                        android:textColor="@color/white"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"/>
+                        android:drawableLeft="@drawable/add_icon"
+                        android:text="Add Detail"
+                        android:textColor="@color/white" />
 
                     <LinearLayout
                         android:id="@+id/layoutfamilyincome"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/grey_100"
-                        android:orientation="vertical" >
+                        android:orientation="vertical">
                         <!-- Dynamic content will be added here -->
                     </LinearLayout>
 
@@ -768,22 +773,21 @@
                         android:layout_marginTop="8dp"
                         android:hint="Monthly Family Expenditure"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        >
+                        app:layout_constraintStart_toStartOf="parent">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/familymonthlyExpenditure"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:inputType="text"
-                            android:hint="" />
+                            android:hint=""
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
-                        android:fontFamily="@font/intel"
-                        android:layout_marginTop="14dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:fontFamily="@font/intel"
                         android:text="Family Status"
                         android:textSize="16sp" />
 
@@ -791,49 +795,49 @@
                     <Spinner
                         android:id="@+id/spinner_familystatus"
                         android:layout_width="match_parent"
-                        android:background="@color/nev_bg_color"
-                        android:layout_height="60dp" />
+                        android:layout_height="60dp"
+                        android:background="@color/nev_bg_color" />
 
 
                     <LinearLayout
                         android:id="@+id/layout1"
-                        android:layout_marginTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@+id/monthlyIncomeLayout001"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical"
+                        app:layout_constraintTop_toBottomOf="@+id/monthlyIncomeLayout001">
+
                         <TextView
                             android:id="@+id/text_house_status"
                             android:layout_width="wrap_content"
-                            android:fontFamily="@font/intel"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/intel"
                             android:text="House Status"
                             android:textSize="16sp" />
 
                         <Spinner
                             android:id="@+id/spinner_house_status"
                             android:layout_width="match_parent"
-                            android:background="@color/nev_bg_color"
-                            android:layout_height="60dp" />
+                            android:layout_height="60dp"
+                            android:background="@color/nev_bg_color" />
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:visibility="gone"
                             android:id="@+id/houseValueRentEditTextLayout"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:hint=""
+                            android:visibility="gone"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/houseValueRentEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:inputType="text"
-                                android:hint="" />
+                                android:hint=""
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -843,15 +847,14 @@
                             android:layout_marginTop="8dp"
                             android:hint="House Size"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/editText_house_size"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:inputType="text"
-                                android:hint="" />
+                                android:hint=""
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -861,15 +864,30 @@
                             android:layout_marginTop="8dp"
                             android:hint="Residence at Address Since"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            >
+                            app:layout_constraintStart_toStartOf="parent">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/editText_residence_since"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:inputType="text"
-                                android:hint="" />
+                                android:hint=""
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="Address"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/addressNew"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -878,10 +896,10 @@
 
                     <LinearLayout
                         android:id="@+id/layout2"
-                        app:layout_constraintTop_toBottomOf="@+id/layout1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        app:layout_constraintTop_toBottomOf="@+id/layout1">
 
                         <!-- Value of House / Rent of House -->
 
@@ -891,25 +909,25 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="19dp"
-                            android:textColor="@color/black"
                             android:text="Job Area Information"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
+
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
 
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/jobAreaLayout"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
-                            android:visibility="gone"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            >
+                            android:visibility="gone">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/jobAreaEditText"
@@ -929,39 +947,40 @@
                             android:layout_gravity="center"
                             android:layout_marginTop="16dp"
                             android:gravity="center"
-                            android:weightSum="2"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/intel"
                                 android:layout_weight="1"
+                                android:fontFamily="@font/intel"
                                 android:text="Select Office Setup Status"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
 
                             <RadioGroup
-                                android:layout_weight="1"
                                 android:id="@+id/radioGroup_family_members"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="horizontal">
 
                                 <RadioButton
                                     android:id="@+id/radioButton_officeSetup"
                                     android:layout_width="wrap_content"
-                                    android:fontFamily="@font/intel"
                                     android:layout_height="wrap_content"
                                     android:checked="true"
+                                    android:fontFamily="@font/intel"
                                     android:text="Good" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton_two"
-                                    android:layout_marginStart="8dp"
+                                    android:id="@+id/radioButton_officeSetupTwo"
                                     android:layout_width="wrap_content"
-                                    android:fontFamily="@font/intel"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="@font/intel"
                                     android:text="Average" />
                             </RadioGroup>
                         </LinearLayout>
@@ -973,39 +992,40 @@
                             android:layout_gravity="center"
                             android:layout_marginTop="16dp"
                             android:gravity="center"
-                            android:weightSum="2"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:fontFamily="@font/intel"
                                 android:layout_weight="1"
+                                android:fontFamily="@font/intel"
                                 android:text="Office Name Board Observed ?"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
 
                             <RadioGroup
-                                android:layout_weight="1"
                                 android:id="@+id/OfficeNameBoardObserved"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="horizontal">
 
                                 <RadioButton
-                                    android:id="@+id/radioButton1_one"
+                                    android:id="@+id/OfficeNameBoardObservedOne"
                                     android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
                                     android:checked="true"
                                     android:fontFamily="@font/intel"
-                                    android:layout_height="wrap_content"
                                     android:text="Yes" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton1_two"
-                                    android:layout_marginStart="16dp"
+                                    android:id="@+id/OfficeNameBoardObservedTwo"
                                     android:layout_width="wrap_content"
-                                    android:fontFamily="@font/intel"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginStart="16dp"
+                                    android:fontFamily="@font/intel"
                                     android:text="No" />
                             </RadioGroup>
                         </LinearLayout>
@@ -1016,8 +1036,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/employerNameEditText"
@@ -1030,30 +1049,28 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/employerNumberEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Employer Mobile No" />
+                                android:hint="Enter Employer Mobile No"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/coEmployeeNameEditText"
@@ -1066,23 +1083,22 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/coEmployeeNumber"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Co-Employee Mobile No" />
+                                android:hint="Enter Co-Employee Mobile No"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
 
 
                         <!-- Co-Employee Name and Mobile No -->
@@ -1093,8 +1109,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:textColor="@color/black"
                             android:text="Security Offered Detail"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -1102,8 +1118,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/securityOfferedEditText"
@@ -1118,15 +1133,14 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/addressOfSecurityEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:lines="3"
-                                android:hint="Enter Address of Security" />
+                                android:hint="Enter Address of Security"
+                                android:lines="3" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <!-- Value of Security -->
@@ -1135,15 +1149,14 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/valueOfSecurityEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Value of Security" />
+                                android:hint="Enter Value of Security"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <!-- Size of Security -->
@@ -1152,23 +1165,22 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            >
+                            android:layout_marginTop="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/sizeOfSecurityEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:hint="Enter Size of Security" />
+                                android:hint="Enter Size of Security"
+                                android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1176,105 +1188,103 @@
                             android:layout_gravity="center"
                             android:layout_marginTop="16dp"
                             android:gravity="center"
-                            android:weightSum="2"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:fontFamily="@font/intel"
                                 android:paddingStart="8dp"
-                                android:layout_weight="1"
                                 android:text="Neighbor Check Status"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
                             <RadioGroup
-                                android:layout_weight="1"
                                 android:id="@+id/EnterNeighborCheckStatus"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:orientation="horizontal">
 
                                 <RadioButton
                                     android:id="@+id/EnterNeighborCheckStatusone"
                                     android:layout_width="wrap_content"
-                                    android:fontFamily="@font/intel"
                                     android:layout_height="wrap_content"
                                     android:checked="true"
+                                    android:fontFamily="@font/intel"
                                     android:text="Positive" />
 
                                 <RadioButton
-                                    android:id="@+id/EnterNeighborCheckStatus_two"
-                                    android:layout_marginStart="8dp"
+                                    android:id="@+id/EnterNeighborCheckStatusTwo"
                                     android:layout_width="wrap_content"
-                                    android:fontFamily="@font/intel"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="@font/intel"
                                     android:text="Negative" />
                             </RadioGroup>
                         </LinearLayout>
-
-
 
 
                         <!-- Bank Details -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
                             android:text="Bank Accounts"
-                            android:textStyle="bold"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:layout_marginTop="16dp"
-                            android:layout_marginBottom="8dp"/>
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/button_add_bank"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Add Bank"
-                            android:drawableLeft="@drawable/add_icon"
+                            android:layout_margin="8dp"
                             android:background="@drawable/round_corner_shape"
                             android:backgroundTint="@color/theme_color"
-                            android:textColor="@color/white"
-                            android:layout_margin="8dp"/>
+                            android:drawableLeft="@drawable/add_icon"
+                            android:text="Add Bank"
+                            android:textColor="@color/white" />
 
                         <LinearLayout
                             android:id="@+id/layoutloans2"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="@color/grey_100"
-                            android:orientation="vertical" >
-                        </LinearLayout>
+                            android:orientation="vertical"></LinearLayout>
 
 
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
 
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
                             android:text="Current Loans"
-                            android:textStyle="bold"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"/>
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/button_add_loans"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Add Loan"
-                            android:drawableLeft="@drawable/add_icon"
+                            android:layout_margin="8dp"
                             android:background="@drawable/round_corner_shape"
                             android:backgroundTint="@color/theme_color"
-                            android:textColor="@color/white"
-                            android:layout_margin="8dp"/>
+                            android:drawableLeft="@drawable/add_icon"
+                            android:text="Add Loan"
+                            android:textColor="@color/white" />
 
                         <LinearLayout
                             android:id="@+id/layoutloans1"
@@ -1286,42 +1296,39 @@
                     </LinearLayout>
 
 
-
                     <View
                         android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="1dp"
-                        android:layout_height="0.5dp"
-                        android:background="@color/them_dark_color"/>
+                        android:background="@color/them_dark_color" />
 
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_marginBottom="4dp"
                         android:layout_height="0.5dp"
-                        android:background="@color/them_dark_color"/>
+                        android:layout_marginBottom="4dp"
+                        android:background="@color/them_dark_color" />
 
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Other Information"
-                        android:textColor="@color/black"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
+                        android:layout_marginStart="8dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:layout_marginStart="8dp"/>
-
-
+                        android:text="Other Information"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
 
                     <View
                         android:layout_width="match_parent"
+                        android:layout_height="2dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="4dp"
-                        android:layout_height="2dp"
-                        android:background="@color/them_dark_color"/>
+                        android:background="@color/them_dark_color" />
 
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -1368,44 +1375,44 @@
 
                     <LinearLayout
                         android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:gravity="center"
-                        android:orientation="vertical"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"
-                        android:layout_height="match_parent">
+                        android:gravity="center"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:layout_gravity="center"
-                            android:gravity="center_vertical"
+                            android:layout_marginTop="16dp"
                             android:background="@drawable/round_corner_shape"
                             android:backgroundTint="@color/theme_color"
-                            android:layout_marginTop="16dp"
-                            android:paddingHorizontal="16dp"
-                            android:orientation="horizontal">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp">
 
                             <ImageView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
+                                android:layout_marginStart="8dp"
                                 android:layout_weight="1"
                                 android:src="@drawable/camera"
-                                app:tint="@color/white"
-                                android:layout_marginStart="8dp"/>
+                                app:tint="@color/white" />
 
                             <TextView
                                 android:id="@+id/storage"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="2"
-                                android:textColor="@color/white"
-                                android:fontFamily="@font/intel"
-                                android:textStyle="bold"
                                 android:layout_gravity="center"
+                                android:layout_weight="2"
+                                android:fontFamily="@font/intel"
                                 android:gravity="center_vertical"
+                                android:text="Upload Images"
+                                android:textColor="@color/white"
                                 android:textSize="16dp"
-                                android:text="Upload Images" />
+                                android:textStyle="bold" />
 
                             <!-- Icon -->
                         </LinearLayout>
@@ -1413,36 +1420,35 @@
 
                         <View
                             android:layout_width="match_parent"
-                            android:layout_marginBottom="4dp"
-                            android:layout_marginTop="12dp"
                             android:layout_height="0.5dp"
-                            android:background="@color/them_dark_color"/>
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="4dp"
+                            android:background="@color/them_dark_color" />
 
                         <TextView
                             android:id="@+id/image"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Selected Images: 0"
-                            android:textColor="@color/black"
-                            android:textStyle="bold"
-                            android:textSize="12dp"
                             android:layout_gravity="end"
-                            android:gravity="end"
-                            android:foregroundGravity="center"
+                            android:layout_marginStart="8dp"
                             android:layout_marginTop="3dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginBottom="3dp"
-                            android:layout_marginStart="8dp"/>
-
-
+                            android:foregroundGravity="center"
+                            android:gravity="end"
+                            android:text="Selected Images: 0"
+                            android:textColor="@color/black"
+                            android:textSize="12dp"
+                            android:textStyle="bold" />
 
 
                         <View
                             android:layout_width="match_parent"
+                            android:layout_height="2dp"
                             android:layout_marginTop="7dp"
                             android:layout_marginBottom="4dp"
-                            android:layout_height="2dp"
-                            android:background="@color/them_dark_color"/>
+                            android:background="@color/them_dark_color" />
+
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -1454,7 +1460,7 @@
                                 android:layout_height="250dp"
                                 android:layout_gravity="center"
                                 android:layout_marginStart="4dp"
-                                android:background="#FFFDE8"
+                                android:background="@color/white"
                                 android:orientation="horizontal"
                                 android:scrollbarSize="25dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
@@ -1484,31 +1490,34 @@
                     </LinearLayout>
 
 
-                    <Button
-                        android:id="@+id/submitSave"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginEnd="19dp"
-                        android:layout_marginStart="19dp"
-                        android:paddingVertical="12dp"
-                        android:textColor="@color/white"
-                        android:text="Save Details"
-                        android:textSize="16sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/notesLayout" />
+                    <!--
+                                        <Button
+                                            android:id="@+id/submitSave"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="24dp"
+                                            android:layout_marginEnd="19dp"
+                                            android:layout_marginStart="19dp"
+                                            android:paddingVertical="12dp"
+                                            android:textColor="@color/white"
+                                            android:text="Save Details"
+                                            android:textSize="16sp"
+                                            app:layout_constraintBottom_toBottomOf="parent"
+                                            app:layout_constraintEnd_toEndOf="parent"
+                                            app:layout_constraintStart_toStartOf="parent"
+                                            app:layout_constraintTop_toBottomOf="@+id/notesLayout" />
+                    -->
 
-                    <Button
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/submitButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="7dp"
                         android:layout_marginBottom="16dp"
                         android:paddingVertical="12dp"
+                        android:text="Preview And Submit"
+                        android:background="@color/warning_stroke_color"
                         android:textColor="@color/white"
-                        android:text="@string/submit_application"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

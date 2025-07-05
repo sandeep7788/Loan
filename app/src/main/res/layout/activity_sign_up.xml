@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:focusable="true"
-            android:background="#FFFDE8"
+            android:background="#019eec"
             android:focusableInTouchMode="true">
 
             <ImageView
@@ -58,7 +58,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="180dp"
                 android:background="@drawable/signin_round_shape"
-                android:backgroundTint="#FAF4D7"
+                android:backgroundTint="#019eec"
                 android:orientation="vertical"
                 android:elevation="@dimen/txt_15sp"
                 app:layout_constraintBottom_toBottomOf="parent"

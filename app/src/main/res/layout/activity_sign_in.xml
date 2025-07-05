@@ -14,11 +14,13 @@
 
         <ImageView
             android:id="@+id/imageView3"
-            android:layout_width="match_parent"
+            android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="45dp"
             android:elevation="1dp"
             android:paddingStart="15dp"
+            android:background="@drawable/circul_white"
+            android:padding="16dp"
             android:paddingEnd="15dp"
             android:layout_marginStart="21dp"
             android:layout_marginEnd="21dp"
@@ -27,7 +29,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            black:srcCompat="@drawable/logo" />
+            android:src="@drawable/logo" />
+
 
         <ImageView
             android:id="@+id/imageView"
@@ -37,7 +40,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:background="#FFFDE8"
+            android:background="#019eec"
             android:scaleType="fitXY"/>
 
 
@@ -60,9 +63,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:elevation="@dimen/txt_15sp"
-                    android:layout_marginTop="150dp"
+                    android:layout_marginTop="190dp"
                     android:background="@drawable/signin_round_shape"
-                    android:backgroundTint="#FAF4D7"
+                    android:backgroundTint="@color/white"
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -177,6 +180,7 @@
                         android:layout_marginStart="36dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginEnd="36dp"
+                        android:textStyle="bold"
                         android:background="@drawable/round_corner_shape"
                         android:backgroundTint="@color/theme_color"
                         android:text="Sign In"
@@ -190,6 +194,7 @@
                         android:layout_gravity="center"
                         android:layout_marginTop="24dp"
                         android:fontFamily="@font/intel"
+                        android:visibility="gone"
                         android:gravity="center"
                         android:paddingTop="2dp"
                         android:singleLine="true"
@@ -205,6 +210,7 @@
                         android:fontFamily="@font/intel"
                         android:gravity="center"
                         android:paddingTop="2dp"
+                        android:visibility="gone"
                         android:singleLine="true"
                         android:text="or"
                         android:textColor="@color/theme_color"
@@ -215,6 +221,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="6dp"
+                        android:visibility="gone"
                         android:fontFamily="@font/intel"
                         android:gravity="center"
                         android:paddingTop="2dp"

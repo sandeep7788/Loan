@@ -2,8 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-    </data>
+    <data></data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -25,43 +24,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-
-                android:weightSum="2"
-                >
+                android:weightSum="2">
 
                 <TextView
                     android:id="@+id/txt_case_id"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/intel"
-                    android:layout_gravity="center"
                     android:layout_weight="1"
+                    android:fontFamily="@font/intel"
                     android:text="Case ID: 00--XXXX"
                     android:textColor="@color/them_dark_color"
                     android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <TextView
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:elevation="2dp"
                     android:id="@+id/txt_status"
-                    android:layout_width="match_parent"
-                    android:fontFamily="@font/intel"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="3dp"
+                    android:layout_weight="1"
                     android:background="@drawable/round_corner_shape"
-                    android:text="Pending"
-                    android:layout_gravity="center"
+                    android:elevation="2dp"
+                    android:fontFamily="@font/intel"
                     android:gravity="center"
-                    android:foregroundGravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:padding="6dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginEnd="16dp"/>
+                    android:text="Pending"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Name -->
@@ -69,17 +63,17 @@
                 android:id="@+id/ApplicantName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name: John Doe"
-                android:fontFamily="@font/intel"
-                android:textColor="@color/black"
-                android:textSize="16sp"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
-                android:textStyle="bold"
+                android:fontFamily="@font/intel"
                 android:paddingTop="4dp"
-                android:paddingBottom="4dp" />
+                android:paddingBottom="4dp"
+                android:text="Name: John Doe"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-            <!-- Application No & Date -->
+            <!-- Application No -->
             <TextView
                 android:id="@+id/txt_application_no"
                 android:layout_width="match_parent"
@@ -87,75 +81,128 @@
                 android:fontFamily="@font/intel"
                 android:text="Application No: 2267115"
                 android:textColor="@color/gray_btn_bg_color"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/MobileNo"
-                android:fontFamily="@font/intel"
-                android:layout_width="match_parent"
-                android:layout_marginTop="2dp"
-                android:layout_height="wrap_content"
-                android:text="Mobile No: 2267115"
-                android:textColor="@color/gray_btn_bg_color"
-                android:textSize="14sp"/>
-
-<!--
-            <TextView
-                android:id="@+id/ApplicantName"
+            <!-- Mobile No -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Initiated Date: 2023-12-01"
-                android:textColor="@color/gray_btn_bg_color"
-                android:textSize="14sp"
-                android:paddingBottom="4dp"/>
--->
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/intel"
+                    android:text="Mobile No: "
+                    android:textColor="@color/gray_btn_bg_color"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/MobileNo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/intel"
+                    android:text="0000000"
+                    android:textColor="@color/them_dark_color"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <!-- Address -->
             <TextView
                 android:id="@+id/txt_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/intel"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
                 android:text="Address: 123 Street, City, Country"
                 android:textColor="@color/black"
-                android:textSize="14sp"
-                android:paddingTop="4dp"
-                android:fontFamily="@font/intel"
-                android:paddingBottom="4dp" />
+                android:textSize="14sp" />
 
-            <!-- Bank & Branch -->
-            <LinearLayout
+            <TextView
+                android:id="@+id/bankName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:orientation="horizontal"
-                >
+                android:fontFamily="@font/intel"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="Bank Name: Example Bank"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/Activity"
-                    android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/branchName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/intel"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="Branch Name: Main Branch"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <!-- Bank & Branch -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/linearLayout2"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bank ID: 6"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
-                
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/theme_color"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"/>
+                    android:orientation="horizontal"
+                    android:visibility="visible"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                <TextView
-                    android:id="@+id/CustomerProfile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:layout_marginStart="4dp"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"/>
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/Activity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bank ID: 6"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
 
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:background="@color/theme_color" />
+
+                    <TextView
+                        android:id="@+id/CustomerProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Profile: aaaaaa"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="39dp"
+                    android:layout_height="39dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="3dp"
+                    android:layout_marginBottom="3dp"
+                    android:background="@drawable/circul_white"
+                    android:elevation="1dp"
+                    android:padding="9dp"
+                    android:src="@drawable/baseline_add_call_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/linearLayout2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
-
     </androidx.cardview.widget.CardView>
 </layout>

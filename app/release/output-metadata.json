@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.cbi_solar.cbisolar",
+  "applicationId": "com.loan_verifier.loan",
   "variantName": "release",
   "elements": [
     {

@@ -36,7 +36,7 @@
 
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
-    <color name="background">#ff00b0b0</color>
+    <color name="background">#019eec</color>
     <color name="blue_btn_bg_color">#D6EAF8</color>
     <color name="item_color">#cc000000</color>
     <color name="blue_btn_bg_pressed_color">#ff96bfd2</color>
@@ -84,6 +84,7 @@
     <color name="tooltip_background_dark">#e6616161</color>
     <color name="tooltip_background_light">#e6ffffff</color>
     <color name="gpvch_black">#212642</color>
+    <color name="gpvch_black1">#019eec</color>
 
 
 
